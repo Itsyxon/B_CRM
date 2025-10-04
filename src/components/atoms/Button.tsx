@@ -11,7 +11,7 @@ const Button = ({
     return (
         <button
             {...props}
-            className={`${className} cursor-pointer bg-blue-400 py-2 px-4 text-white rounded-lg text-lg`}
+            className={`cursor-pointer bg-blue-400 py-2 px-4 text-white rounded-lg text-lg ${className}`}
         >
             {children}
         </button>

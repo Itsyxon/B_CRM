@@ -6,7 +6,7 @@ import React from 'react';
 
 const LoginPage = () => {
     return (
-        <div className='absolute left-1/2 top-1/2 -translate-1/2 *:[&>h1]:text-center'>
+        <div className='absolute left-1/2 top-1/2 -translate-1/2 *:[&>h1]:text-center [&>*]:first:!w-[550px]'>
             <Content>
                 <Logo />
                 <LoginForm />
