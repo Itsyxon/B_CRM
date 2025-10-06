@@ -1,9 +1,10 @@
+import DashboardWidgets from '@/components/organisms/DashboardWidgets/DashboardWidgets';
 import React from 'react';
 
 const DashboardPage = () => {
     return (
         <div>
-            Dashboard page
+            <DashboardWidgets />
         </div>
     );
 };
