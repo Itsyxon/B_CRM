@@ -11,6 +11,7 @@ const Header = () => {
         '/projects': 'Проекты',
         '/staff': 'Персонал',
         '/settings': 'Настройки',
+        '/help': 'Связаться с нами'
     }
 
     return (

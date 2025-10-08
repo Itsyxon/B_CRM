@@ -1,7 +1,7 @@
 'use client'
 import Button from '@/components/atoms/Button';
 import Logo from '@/components/atoms/Logo';
-import { CircleGauge, FolderKanban, Settings, ShieldUser, UserRoundCog } from 'lucide-react';
+import { CircleGauge, FolderKanban, MessageCircleQuestionMark, Settings, ShieldUser, UserRoundCog } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -12,6 +12,7 @@ const navLinks = [
     { id: 3, label: 'Проекты', link: '/projects', icon: <FolderKanban /> },
     { id: 4, label: 'Персонал', link: '/staff', icon: <ShieldUser /> },
     { id: 5, label: 'Настройки', link: '/settings', icon: <Settings /> },
+    { id: 6, label: 'Помощь', link: '/help', icon: <MessageCircleQuestionMark /> },
 ]
 
 const NavBar = () => {

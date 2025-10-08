@@ -1,0 +1,1 @@
+export const USER_REQUESTS = 'USER_REQUESTS'
