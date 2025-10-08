@@ -1,3 +1,4 @@
+'use client'
 import DashboardWidgets from '@/components/organisms/DashboardWidgets/DashboardWidgets';
 import DashboardYearStats from '@/components/organisms/DashboardYearStats/DashboardYearStats';
 import React from 'react';

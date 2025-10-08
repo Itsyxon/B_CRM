@@ -4,7 +4,7 @@ import Content from '@/components/atoms/Content';
 
 const DashboardWidgets = () => {
     return (
-        <div className='grid grid-cols-3 gap-8 mt-10 [&>*]:min-w-[350px]'>
+        <div className='grid grid-cols-3 gap-8 [&>*]:min-w-[350px]'>
             {widgetsData.map((widget) => (
                 <Content key={widget.id}>
                     <div className='flex flex-col'>
