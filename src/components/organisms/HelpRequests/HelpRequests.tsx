@@ -20,13 +20,13 @@ const HelpRequests = () => {
     }
 
     return (
-        <div>
+        <div className='w-1/3'>
             <h1 className='text-xl font-semibold mb-4'>Мои обращения</h1>
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[300px] overflow-y-auto">
                 {requests.map((request) => (
                     <div
                         key={request.id}
-                        className="bg-[var(--tertiary)] border border-gray-200 rounded-lg p-4 shadow-sm max-w-1/3"
+                        className="bg-[var(--tertiary)] border border-gray-200 rounded-lg p-4 shadow-sm max-w-full"
                     >
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-sm text-gray-500">

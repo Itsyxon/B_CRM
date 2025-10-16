@@ -16,3 +16,4 @@ npm run dev
 5. React-hook-form
 6. Lucide React
 7. i18n
+8. React-Table (Tanstack Table)
