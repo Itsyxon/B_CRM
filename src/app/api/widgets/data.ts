@@ -22,4 +22,4 @@ export const widgetsData: DashboardWidget[] = [
     amount: '$78,030',
     bonus: '+19.98%',
   },
-] // ! тестовые данные до привязки backend-а.
+]

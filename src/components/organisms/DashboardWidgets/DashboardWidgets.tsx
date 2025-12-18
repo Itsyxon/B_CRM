@@ -1,11 +1,25 @@
 import React from 'react';
-import { widgetsData } from './WidgetsData';
 import Content from '@/components/atoms/Content';
+import Loader from '@/components/atoms/Loader';
+import { useWidgets } from '@/app/api/widgets/useWidgets';
 
 const DashboardWidgets = () => {
+    const { data: widgetsData, isLoading, isError } = useWidgets()
+
+    if (isLoading) {
+        return <Loader className='ml-auto w-32 h-32' />
+    }
+
+    if (isError) {
+        return <Content>
+            <p className='text-red-500 text-lg'>
+                Ошибка загрузки данных
+            </p>
+        </Content>
+    }
     return (
         <div className='grid grid-cols-3 gap-8 [&>*]:min-w-[350px]'>
-            {widgetsData.map((widget) => (
+            {widgetsData?.map((widget) => (
                 <Content key={widget.id}>
                     <div className='flex flex-col'>
                         <div className='text-xl font-semibold text-gray-800'>{widget.title}</div>

@@ -10,4 +10,4 @@ const StaffPage = () => {
     );
 };
 
-export default StaffPage;
+export default StaffPage; 

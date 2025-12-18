@@ -21,14 +21,21 @@ const LoginForm = () => {
     const methods = useForm<AuthData>()
     const router = useRouter()
     const [error, setError] = useState<boolean>(false)
+    const [submiting, setSubmiting] = useState<boolean>(false)
+
     const formSubmit = (data: AuthData) => {
-        if (data.user_login == 'admin' && data.user_password == 'admin1') { // ! Тестовые данные без привязки к бэку
-            document.cookie = 'auth-token=token5'
-            router.push('/dashboard')
-        } else {
-            setError(true)
-        }
+        setSubmiting(true)
+        setTimeout(() => {
+            if (data.user_login == 'admin' && data.user_password == 'admin1') { // ! Тестовые данные без привязки к бэку
+                document.cookie = 'auth-token=token5'
+                router.push('/dashboard')
+            } else {
+                setError(true)
+            }
+            setSubmiting(false)
+        }, 1000) // * имитация отправки запроса
     }
+
     return (
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(formSubmit)} className='flex flex-col gap-3'>
@@ -41,7 +48,7 @@ const LoginForm = () => {
                     <FormInput name='user_password' type='password' className='w-full'></FormInput>
                 </div>
                 {error && <p className='my-2 text-red-700'>Данные указаны неверно</p>}
-                <Button className='mt-2 w-[125px] self-center'>Войти</Button>
+                <Button disabled={submiting} className='mt-2 w-[125px] self-center'>{submiting ? 'Загрузка...' : 'Войти'}</Button>
             </form>
         </FormProvider >
     );

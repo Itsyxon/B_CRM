@@ -8,6 +8,7 @@ const DashboardPage = () => {
         <div className='w-1/2 flex flex-col gap-10'>
             <DashboardWidgets />
             <DashboardYearStats />
+            <DashboardYearStats />
         </div>
     );
 };
