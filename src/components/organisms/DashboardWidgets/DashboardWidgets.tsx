@@ -1,4 +1,4 @@
-import React from 'react';
+'use client'
 import Content from '@/components/atoms/Content';
 import Loader from '@/components/atoms/Loader';
 import { useWidgets } from '@/app/api/widgets/useWidgets';

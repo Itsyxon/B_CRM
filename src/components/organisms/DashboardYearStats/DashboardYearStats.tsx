@@ -1,5 +1,4 @@
-import Content from '@/components/atoms/Content';
-import DataPieBar from '../DataPieBar/DataPieBar';
+'use client'
 import DataYear from '../DataYear/DataYear';
 import DataDiagram from '../DataDiagram/DataDiagram';
 
