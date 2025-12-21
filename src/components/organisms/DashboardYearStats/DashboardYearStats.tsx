@@ -1,18 +1,13 @@
-'use client'
 import Content from '@/components/atoms/Content';
-import React from 'react';
-import DataYearBar from '../DataYearBar/DataYearBar';
 import DataPieBar from '../DataPieBar/DataPieBar';
+import DataYear from '../DataYear/DataYear';
+import DataDiagram from '../DataDiagram/DataDiagram';
 
 const DashboardYearStats = () => {
     return (
         <div className='flex justify-between'>
-            <Content>
-                <DataYearBar />
-            </Content>
-            <Content>
-                <DataPieBar />
-            </Content>
+            <DataYear />
+            <DataDiagram />
         </div>
     );
 };

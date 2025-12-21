@@ -30,13 +30,13 @@ ChartJS.defaults.plugins.tooltip.boxHeight = 20
 ChartJS.defaults.plugins.tooltip.borderWidth = 2
 ChartJS.defaults.plugins.tooltip.borderColor = '#F6F6F6'
 
-const DataYearBar = () => {
+const DataYearBar = ({ yearData }: { yearData: number[] }) => {
     const data = {
         labels: months,
         datasets: [
             {
                 label: 'Данные за год',
-                data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                data: yearData,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,

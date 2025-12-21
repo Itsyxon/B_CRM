@@ -21,12 +21,12 @@ ChartJS.defaults.plugins.tooltip.boxHeight = 20
 ChartJS.defaults.plugins.tooltip.borderWidth = 2
 ChartJS.defaults.plugins.tooltip.borderColor = '#F6F6F6'
 
-const DataPieBar = () => {
+const DataPieBar = ({ clientsData }: { clientsData: number[] }) => {
     const data = {
         datasets: [
             {
                 label: 'Новые клиенты',
-                data: [5, 9, 7, 6, 15, 21, 23, 8],
+                data: clientsData,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.6)',
                     'rgba(54, 162, 235, 0.6)',
