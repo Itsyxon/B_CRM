@@ -108,6 +108,7 @@ const HelpForm = ({ handleFormSubmit }: { handleFormSubmit: () => void }) => {
                     name='problemText'
                     placeholder='Опишите вашу проблему подробно'
                     required
+                    className='h-full'
                 />
 
                 <Button

@@ -1,6 +1,5 @@
 import { USER_REQUESTS } from '@/lib/constants';
 import LocalStorage from '@/lib/LocalStorage';
-import React from 'react';
 
 type Request = {
     id: number,

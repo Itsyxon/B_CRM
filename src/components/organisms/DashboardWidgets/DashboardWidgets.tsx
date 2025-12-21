@@ -2,6 +2,7 @@ import React from 'react';
 import Content from '@/components/atoms/Content';
 import Loader from '@/components/atoms/Loader';
 import { useWidgets } from '@/app/api/widgets/useWidgets';
+import { hidePrice } from '@/lib/utils';
 
 const DashboardWidgets = () => {
     const { data: widgetsData, isLoading, isError } = useWidgets()
@@ -25,7 +26,7 @@ const DashboardWidgets = () => {
                         <div className='text-xl font-semibold text-gray-800'>{widget.title}</div>
                         <div className='text-sm text-gray-600 mb-3'>{widget.description}</div>
                         <div className='flex justify-between items-end'>
-                            <div className='text-2xl font-semibold'>{widget.amount}</div>
+                            <div className='text-2xl font-semibold'>{hidePrice(widget.amount)}</div>
                             <div className={`${widget.bonus[0] == '+' ? 'text-green-600' : 'text-red-800'} font-semibold`}>{widget.bonus}</div>
                         </div>
                     </div>

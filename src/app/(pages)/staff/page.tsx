@@ -1,5 +1,4 @@
 import StaffTable from '@/components/organisms/StaffTable/StaffTable';
-import React from 'react';
 
 const StaffPage = () => {
     return (

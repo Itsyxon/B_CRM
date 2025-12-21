@@ -1,1 +1,2 @@
 export const USER_REQUESTS = 'USER_REQUESTS'
+export const SETTINGS_PRICE = 'SETTINGS_PRICE'

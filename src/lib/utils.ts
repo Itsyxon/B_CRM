@@ -1,3 +1,5 @@
+import LocalStorage from './LocalStorage'
+
 export const months = [
   'Январь',
   'Февраль',
@@ -12,3 +14,10 @@ export const months = [
   'Ноябрь',
   'Декабрь',
 ]
+
+export function hidePrice(price: string | number): string | number {
+  if (LocalStorage.get('SETTINGS_PRICE')) {
+    return '****'
+  }
+  return price
+}
