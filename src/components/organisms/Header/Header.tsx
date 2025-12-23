@@ -12,7 +12,8 @@ const Header = () => {
         '/staff': 'Персонал',
         '/settings': 'Настройки',
         '/help': 'Связаться с нами',
-        '/profile': 'Профиль'
+        '/profile': 'Профиль',
+        '/search': 'Поиск'
     }
 
     return (

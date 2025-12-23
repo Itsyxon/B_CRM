@@ -1,0 +1,19 @@
+import Content from "@/components/atoms/Content";
+import { memo } from "react";
+
+const SearchResults = memo(({ value }: { value: string }) => {
+    const searchArray = Array.from({ length: Math.floor(Math.random() * 15) }, () => value)
+
+    return (
+        <div className="w-1/2">
+            <h1 className="my-4 text-xl">По запросу {value + ' найдено ' + searchArray.length} совпадений:</h1>
+            {searchArray.map((item, index) => (
+                <Content key={index} className="w-full mb-4">
+                    Элемент с {item}
+                </Content>
+            ))}
+        </div>
+    );
+});
+
+export default SearchResults;
