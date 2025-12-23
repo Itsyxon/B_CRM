@@ -6,10 +6,10 @@ const SearchResults = memo(({ value }: { value: string }) => {
 
     return (
         <div className="w-1/2">
-            <h1 className="my-4 text-xl">По запросу {value + ' найдено ' + searchArray.length} совпадений:</h1>
+            <h1 className="my-4 text-xl truncate">По запросу {value + ' найдено ' + searchArray.length} совпадений:</h1>
             {searchArray.map((item, index) => (
-                <Content key={index} className="w-full mb-4">
-                    Элемент с {item}
+                <Content key={index} className="min-w-1/2 mb-4">
+                    <p className="truncate max-w-[550px]"> Элемент с {item}</p>
                 </Content>
             ))}
         </div>
