@@ -5,7 +5,7 @@ import React from 'react'
 const Header = () => {
     const pathName = usePathname()
 
-    const pageTitles: { [key: string]: string } = {
+    const pageTitles: Record<string, string> = {
         '/dashboard': 'Дашборд',
         '/users': 'Пользователи',
         '/projects': 'Проекты',
