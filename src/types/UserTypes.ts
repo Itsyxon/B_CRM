@@ -9,4 +9,6 @@ export interface UserType {
   role: UserPermissionRole | string
   email: string
   createdAt: string
+  bio?: string
+  photo?: string
 }
