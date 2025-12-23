@@ -8,7 +8,7 @@ const DashboardWidgets = () => {
     const { data: widgetsData, isLoading, isError } = useWidgets()
 
     if (isLoading) {
-        return <Loader className='ml-auto w-32 h-32' />
+        return <div><Loader className='m-auto w-32 h-32' /></div>
     }
 
     if (isError) {

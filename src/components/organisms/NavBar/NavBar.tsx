@@ -24,7 +24,7 @@ const NavBar = () => {
     }
 
     return (
-        <nav className='bg-[#F3F3F5] w-[250px] h-screen border-r border-gray-300 flex flex-col py-8 justify-between fixed'>
+        <nav className='bg-[var(--navbar)] w-[250px] h-screen border-r border-gray-300 flex flex-col py-8 justify-between fixed'>
             <div className='[&>h1]:mb-12 [&>h1]:px-6'>
                 <Logo />
                 <div className='flex flex-col'>
@@ -33,7 +33,7 @@ const NavBar = () => {
                     ))}
                 </div>
             </div>
-            <div className='bg-[#F3F3F5] w-fit px-6'>
+            <div className='bg-[var(--navbar)] w-fit px-6'>
                 <Button onClick={handleLogout} className='bg-red-300 !text-red-700 hover:bg-red-700 hover:!text-white transition'>Выйти</Button>
             </div>
         </nav>
