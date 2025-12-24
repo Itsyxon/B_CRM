@@ -34,6 +34,7 @@ const NavBar = () => {
                 </div>
             </div>
             <div className='bg-[var(--navbar)] w-fit px-6'>
+
                 <Button onClick={handleLogout} className='bg-red-300 !text-red-700 hover:bg-red-700 hover:!text-white transition'>Выйти</Button>
             </div>
         </nav>

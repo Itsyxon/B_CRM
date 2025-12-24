@@ -1,4 +1,5 @@
 import Content from "@/components/atoms/Content";
+import { ChevronRight } from "lucide-react";
 import { memo } from "react";
 
 const SearchResults = memo(({ value }: { value: string }) => {
@@ -8,8 +9,9 @@ const SearchResults = memo(({ value }: { value: string }) => {
         <div className="w-1/2">
             <h1 className="my-4 text-xl truncate">По запросу {value + ' найдено ' + searchArray.length} совпадений:</h1>
             {searchArray.map((item, index) => (
-                <Content key={index} className="min-w-1/2 mb-4">
+                <Content key={index} className="min-w-1/2 mb-4 flex justify-between items-center">
                     <p className="truncate max-w-[550px]"> Элемент с {item}</p>
+                    <ChevronRight />
                 </Content>
             ))}
         </div>

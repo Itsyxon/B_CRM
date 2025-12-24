@@ -17,7 +17,7 @@ const Header = () => {
     }
 
     return (
-        <header className='flex items-center justify-between mb-10'>
+        <header className='flex items-center justify-between mb-6'>
             <h1 className='text-3xl font-semibold text-[var(--secondary)]'>
                 {pageTitles[pathName]}
             </h1>
