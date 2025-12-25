@@ -8,7 +8,7 @@ const DashboardWidgets = () => {
     const { data: widgetsData, isLoading, isError } = useWidgets()
 
     if (isLoading) {
-        return <div><Loader className='m-auto w-32 h-32' /></div>
+        return <Content className="w-full flex justify-center"><Loader className='m-auto w-32 h-32' /></Content>
     }
 
     if (isError) {
@@ -23,8 +23,8 @@ const DashboardWidgets = () => {
             {widgetsData?.map((widget) => (
                 <Content key={widget.id}>
                     <div className='flex flex-col'>
-                        <div className='text-xl font-semibold text-gray-800'>{widget.title}</div>
-                        <div className='text-sm text-gray-600 mb-3'>{widget.description}</div>
+                        <div className='text-xl font-semibold text-[var(--secondary)]'>{widget.title}</div>
+                        <div className='text-sm text-[var(--secondary)]/80 mb-3'>{widget.description}</div>
                         <div className='flex justify-between items-end'>
                             <div className='text-2xl font-semibold'>{hidePrice(widget.amount)}</div>
                             <div className={`${widget.bonus[0] == '+' ? 'text-green-600' : 'text-red-800'} font-semibold`}>{widget.bonus}</div>

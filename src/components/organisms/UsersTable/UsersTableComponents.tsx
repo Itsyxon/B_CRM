@@ -17,7 +17,7 @@ export const userColumns: ColumnDef<UserType>[] = [
     },
     {
         accessorKey: 'createdAt',
-        header: 'Присоединился',
+        header: 'Дата регистрации',
         cell: (info) => new Date(info.getValue() as string).toLocaleDateString('ru-Ru')
     }
 ]

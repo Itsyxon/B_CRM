@@ -6,7 +6,8 @@
   --secondary: #2b2b38;
   --tertiary: #ffffff;
   --navbar: #F3F3F5;
-  /* --info: */
+  --info: #3C9EFF;
+  --accent-gray: #9EABB7;
 }
 
 @theme inline {

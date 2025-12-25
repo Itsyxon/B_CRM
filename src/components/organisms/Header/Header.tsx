@@ -42,7 +42,7 @@ const Header = () => {
             <h1 className='text-3xl font-semibold text-[var(--secondary)]'>
                 {pageName.title}
             </h1>
-            <h2 className='text-md'>{pageName?.subTitle}</h2>
+            <h2 className='text-md text-gray-500'>{pageName?.subTitle}</h2>
         </header>
     )
 }
