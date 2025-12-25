@@ -1,3 +1,4 @@
+'use client'
 import { useYearData } from '@/app/api/year-data/useYearData';
 import DataYearBar from '../DataYearBar/DataYearBar';
 import Loader from '@/components/atoms/Loader';

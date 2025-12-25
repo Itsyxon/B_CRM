@@ -1,4 +1,3 @@
-'use client'
 import DataYear from '../DataYear/DataYear';
 import DataDiagram from '../DataDiagram/DataDiagram';
 
