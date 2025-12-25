@@ -4,7 +4,7 @@ import DataDiagram from '../DataDiagram/DataDiagram';
 
 const DashboardYearStats = () => {
     return (
-        <div className='flex justify-between'>
+        <div className='flex gap-8'>
             <DataYear />
             <DataDiagram />
         </div>

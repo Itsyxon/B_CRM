@@ -19,7 +19,7 @@ const DashboardWidgets = () => {
         </Content>
     }
     return (
-        <div className='grid grid-cols-3 gap-8 [&>*]:min-w-[350px]'>
+        <div className='flex gap-8 [&>*]:min-w-[350px]'>
             {widgetsData?.map((widget) => (
                 <Content key={widget.id}>
                     <div className='flex flex-col'>
