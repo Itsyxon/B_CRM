@@ -8,7 +8,7 @@ const DataYear = () => {
     const { data: yearData, isLoading, isError } = useYearData()
 
     if (isLoading) {
-        return <Content className="w-full flex justify-center"><Loader className='m-auto w-24 h-24' /></Content>
+        return <Content className="w-full flex justify-center items-center h-[305px]"><Loader className='m-auto w-24 h-24' /></Content>
     }
 
     if (!yearData?.length) {

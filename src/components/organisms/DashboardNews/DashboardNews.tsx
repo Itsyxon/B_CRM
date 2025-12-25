@@ -31,7 +31,7 @@ const DashboardNews = () => {
             <div className="text-xl text-[var(--secondary)] font-semibold">Лента <span className="text-sm align-top text-[var(--secondary)]">{total}</span></div>
             <div className="flex flex-col gap-4">
                 {allNews.map((item) => (
-                    <div key={item.id} className="p-4 flex items-start gap-3">
+                    <div key={item.id} className="py-4 flex items-start gap-3">
                         <div className="w-12 h-12 rounded-xl bg-[var(--accent-gray)]"></div>
                         <div>
                             <h2 className="text-xl mb-2 text-[var(--info)]">{item.title}</h2>

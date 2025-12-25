@@ -9,7 +9,7 @@ const DataDiagram = () => {
     const { data: clientsData, isLoading } = useNewClients()
 
     if (isLoading) {
-        return <Content className="w-full flex justify-center"><Loader className='mx-auto w-24 h-24' /></Content>
+        return <Content className="w-full flex justify-center items-center h-[305px]"><Loader className='mx-auto w-24 h-24' /></Content>
     }
 
     if (!clientsData?.length) {

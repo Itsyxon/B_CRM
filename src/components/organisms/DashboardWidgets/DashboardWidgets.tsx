@@ -8,7 +8,7 @@ const DashboardWidgets = () => {
     const { data: widgetsData, isLoading, isError } = useWidgets()
 
     if (isLoading) {
-        return <Content className="w-full flex justify-center"><Loader className='m-auto w-32 h-32' /></Content>
+        return <Content className="w-full flex justify-center items-center h-[144px]"><Loader className='m-auto w-24 h-24' /></Content>
     }
 
     if (isError) {
