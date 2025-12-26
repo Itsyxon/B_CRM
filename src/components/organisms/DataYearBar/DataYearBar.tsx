@@ -63,7 +63,7 @@ const DataYearBar = ({ yearData }: { yearData: number[] }) => {
     };
 
     return (
-        <div className='w-[685px] h-[300px]'>
+        <div className='w-[585px] h-[300px]'>
             <Bar data={data} options={{
                 ...options,
                 responsive: true,

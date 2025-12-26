@@ -4,9 +4,11 @@ import DashboardYearStats from '@/components/organisms/DashboardYearStats/Dashbo
 
 const DashboardPage = () => {
     return (
-        <div className='flex flex-col gap-10 flex-wrap w-1/2'>
-            <DashboardWidgets />
-            <DashboardYearStats />
+        <div className='flex gap-8'>
+            <div className='flex flex-col gap-8'>
+                <DashboardWidgets />
+                <DashboardYearStats />
+            </div>
             <DashboardNews />
         </div>
     );

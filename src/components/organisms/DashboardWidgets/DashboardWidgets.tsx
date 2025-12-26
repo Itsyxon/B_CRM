@@ -8,7 +8,11 @@ const DashboardWidgets = () => {
     const { data: widgetsData, isLoading, isError } = useWidgets()
 
     if (isLoading) {
-        return <Content className="w-full flex justify-center items-center h-[144px]"><Loader className='m-auto w-24 h-24' /></Content>
+        return <div className='flex gap-8'>
+            <Content className="flex justify-center items-center h-[144px]"><Loader className='m-auto w-24 h-24' /></Content>
+            <Content className="flex justify-center items-center h-[144px]"><Loader className='m-auto w-24 h-24' /></Content>
+            <Content className="flex justify-center items-center h-[144px] w-[300px]"><Loader className='m-auto w-24 h-24' /></Content>
+        </div>
     }
 
     if (isError) {
@@ -19,7 +23,7 @@ const DashboardWidgets = () => {
         </Content>
     }
     return (
-        <div className='flex gap-8 [&>*]:min-w-[350px]'>
+        <div className='flex gap-8 [&>*]:min-w-[300px]'>
             {widgetsData?.map((widget) => (
                 <Content key={widget.id}>
                     <div className='flex flex-col'>

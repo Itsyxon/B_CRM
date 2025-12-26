@@ -27,33 +27,30 @@ const DashboardNews = () => {
     }
 
     return (
-        <Content className="w-full">
+        <Content className="w-full flex flex-col">
             <div className="text-xl text-[var(--secondary)] font-semibold">Лента <span className="text-sm align-top text-[var(--secondary)]">{total}</span></div>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 my-4">
                 {allNews.map((item) => (
-                    <div key={item.id} className="py-4 flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-[var(--accent-gray)]"></div>
-                        <div>
-                            <h2 className="text-xl mb-2 text-[var(--info)]">{item.title}</h2>
-                            <p className="text-sm">{item.description}</p>
-                            <div className="flex gap-5 items-center mt-5 text-[var(--secondary)]">
-                                <p className="flex items-center gap-2"><ThumbsUp size={12} /> {item.likes}</p>
-                                <p className="flex items-center gap-2"><MessageSquareMore size={12} /> {item.comments}</p>
-                                <p className="flex items-center gap-2"><Repeat2 size={14} /> {item.reposts}</p>
-                            </div>
+                    <div key={item.id}>
+                        <h2 className="text-xl mb-2 text-[var(--info)]">{item.title}</h2>
+                        <p className="text-sm">{item.description}</p>
+                        <div className="flex gap-5 items-center mt-5 text-[var(--secondary)]">
+                            <p className="flex items-center gap-2"><ThumbsUp size={12} /> {item.likes}</p>
+                            <p className="flex items-center gap-2"><MessageSquareMore size={12} /> {item.comments}</p>
+                            <p className="flex items-center gap-2"><Repeat2 size={14} /> {item.reposts}</p>
                         </div>
                     </div>
                 ))}
-                {hasNextPage && (
-                    <Button
-                        onClick={() => fetchNextPage()}
-                        disabled={isFetchingNextPage}
-                        className="w-full py-2 px-4 rounded-lg"
-                    >
-                        {isFetchingNextPage ? 'Загрузка...' : 'Загрузить еще'}
-                    </Button>
-                )}
             </div>
+            {hasNextPage && (
+                <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="w-full py-2 px-4 rounded-lg"
+                >
+                    {isFetchingNextPage ? 'Загрузка...' : 'Загрузить еще'}
+                </Button>
+            )}
         </Content>
     );
 };

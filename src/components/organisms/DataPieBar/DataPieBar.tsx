@@ -44,7 +44,7 @@ const DataPieBar = ({ clientsData }: { clientsData: number[] }) => {
     };
 
     return (
-        <div className='w-[305px] h-[305px]'>
+        <div className='w-[255px] h-[285px]'>
             <Pie data={data} />
         </div>
     );
