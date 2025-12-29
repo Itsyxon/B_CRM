@@ -28,13 +28,13 @@ const DashboardNews = () => {
 
     return (
         <Content className="w-full flex flex-col justify-between h-[533px]">
-            <div className="text-xl text-[var(--secondary)] font-semibold">Лента <span className="text-sm align-top text-[var(--secondary)]">{total}</span></div>
-            <div className="flex flex-col gap-4 my-4 overflow-y-auto">
+            <div className="text-xl text-secondary font-semibold">Лента <span className="text-sm align-top text-secondary">{total}</span></div>
+            <div className="flex flex-col gap-4 my-4 overflow-y-auto font-accent">
                 {allNews.map((item) => (
                     <div key={item.id}>
                         <h2 className="text-xl mb-2 text-[var(--info)]">{item.title}</h2>
                         <p className="text-sm">{item.description}</p>
-                        <div className="flex gap-5 items-center mt-5 text-[var(--secondary)]">
+                        <div className="flex gap-5 items-center mt-5 text-secondary">
                             <p className="flex items-center gap-2"><ThumbsUp size={12} /> {item.likes}</p>
                             <p className="flex items-center gap-2"><MessageSquareMore size={12} /> {item.comments}</p>
                             <p className="flex items-center gap-2"><Repeat2 size={14} /> {item.reposts}</p>

@@ -19,7 +19,7 @@ const NavBar = () => {
                 <Logo />
                 <div className='flex flex-col'>
                     {navLinks.map((navLink) => (
-                        <Link href={navLink.link} key={navLink.id} className='py-5 px-6 flex gap-4 border-l-8 border-[#F3F3F5] hover:border-l-8 hover:border-blue-400 hover:bg-blue-300/30 transition font-medium'>{navLink.icon} {navLink.label}</Link>
+                        <Link href={navLink.link} key={navLink.id} className='py-5 px-6 flex gap-4 border-l-8 border-[#F3F3F5] hover:border-l-8 hover:border-blue-400 hover:bg-blue-300/30 transition'>{navLink.icon} {navLink.label}</Link>
                     ))}
                 </div>
             </div>

@@ -25,7 +25,7 @@ const CommonForm = () => {
             </div>
             <Divider />
             <div className='font-semibold'>Виджеты</div>
-            <p className='text-sm text-[var(--secondary)]'><Link className='text-[var(--info)] font-semibold underline underline-offset-4' href='/help'>Свяжитесь</Link> с тех. поддержкой, чтобы запросить создание собственного виджета</p>
+            <p className='text-sm text-secondary'><Link className='text-[var(--info)] font-semibold underline underline-offset-4' href='/help'>Свяжитесь</Link> с тех. поддержкой, чтобы запросить создание собственного виджета</p>
             <Divider />
             <div className='font-semibold'>Настройка проектов</div>
             <div>

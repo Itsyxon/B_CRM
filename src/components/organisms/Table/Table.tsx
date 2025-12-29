@@ -36,7 +36,7 @@ const Table = <TData,>({ data, columns, defaultSorting = [], pagination = true, 
                                 {headerGroup.headers.map((header) => (
                                     <th
                                         key={header.id}
-                                        className="px-4 py-5 text-left text-sm font-medium text-[var(--secondary)] cursor-pointer"
+                                        className="px-4 py-5 text-left text-sm font-medium text-secondary cursor-pointer"
                                         onClick={header.column.getToggleSortingHandler()}
                                     >
                                         <div className="flex items-center justify-between">

@@ -27,8 +27,8 @@ const DashboardWidgets = () => {
             {widgetsData?.map((widget) => (
                 <Content key={widget.id}>
                     <div className='flex flex-col'>
-                        <div className='text-xl font-semibold text-[var(--secondary)]'>{widget.title}</div>
-                        <div className='text-sm text-[var(--secondary)]/80 mb-3'>{widget.description}</div>
+                        <div className='text-xl font-semibold text-secondary'>{widget.title}</div>
+                        <div className='text-sm text-secondary/80 mb-3'>{widget.description}</div>
                         <div className='flex justify-between items-end'>
                             <div className='text-2xl font-semibold'>{hidePrice(widget.amount)}</div>
                             <div className={`${widget.bonus[0] == '+' ? 'text-green-600' : 'text-red-800'} font-semibold`}>{widget.bonus}</div>

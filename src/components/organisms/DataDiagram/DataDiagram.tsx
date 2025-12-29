@@ -20,7 +20,7 @@ const DataDiagram = () => {
 
     return (
         <Content>
-            <h1 className='text-xl text-[var(--secondary)] font-semibold'>Новые клиенты</h1>
+            <h1 className='text-xl text-secondary font-semibold'>Новые клиенты</h1>
             <DataPieBar clientsData={clientsData} />
         </Content>
     );

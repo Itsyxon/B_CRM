@@ -39,7 +39,7 @@ const Header = () => {
 
     return (
         <header className='flex flex-col mb-4'>
-            <h1 className='text-3xl font-semibold text-[var(--secondary)]'>
+            <h1 className='text-3xl font-semibold text-secondary'>
                 {pageName.title}
             </h1>
             <h2 className='text-md text-[var(--accent-gray)] font-semibold'>{pageName?.subTitle}</h2>
