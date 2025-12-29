@@ -1,5 +1,4 @@
-// components/atoms/Select.tsx
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 
 const Select = ({ className = '', children, ...props }: { className?: string } & ComponentProps<'select'>) => {
     return (

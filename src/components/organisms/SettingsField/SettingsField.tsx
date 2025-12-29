@@ -18,7 +18,7 @@ const SettingsField = () => {
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
             />
-            <div className=''>
+            <div>
                 {activeTab === 'common' && <SettingsCommon />}
                 {activeTab === 'own' && <SettingsOwn />}
             </div>

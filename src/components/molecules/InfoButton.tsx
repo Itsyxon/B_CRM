@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 const InfoButton = ({ className }: { className?: string }) => {
     const router = useRouter()
     return (
-        <Button className={`${className} bg-gray-500`} onClick={() => router.push('/info')}>
+        <Button className={`${className} !bg-[var(--accent-gray)]`} onClick={() => router.push('/info')}>
             ?
         </Button>
     );

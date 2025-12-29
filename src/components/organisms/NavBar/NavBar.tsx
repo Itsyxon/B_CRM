@@ -1,10 +1,7 @@
-'use client'
-import Button from '@/components/atoms/Button';
 import Logo from '@/components/atoms/Logo';
+import LogoutButton from '@/components/molecules/LogoutButton';
 import { CircleGauge, FolderKanban, MessageCircleQuestionMark, Settings, ShieldUser, UserRoundCog } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React from 'react';
 
 const navLinks = [
     { id: 1, label: 'Дашборд', link: '/dashboard', icon: <CircleGauge /> },
@@ -16,13 +13,6 @@ const navLinks = [
 ]
 
 const NavBar = () => {
-    const router = useRouter()
-    const handleLogout = () => {
-        document.cookie =
-            'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-        router.push('/login')
-    }
-
     return (
         <nav className='bg-[var(--navbar)] w-[250px] h-screen border-r border-gray-300 flex flex-col py-8 justify-between fixed'>
             <div className='[&>h1]:mb-12 [&>h1]:px-6'>
@@ -33,9 +23,8 @@ const NavBar = () => {
                     ))}
                 </div>
             </div>
-            <div className='bg-[var(--navbar)] w-fit px-6'>
-
-                <Button onClick={handleLogout} className='bg-red-300 !text-red-700 hover:bg-red-700 hover:!text-white transition'>Выйти</Button>
+            <div className='bg-[var(--navbar)] w-fit mx-6'>
+                <LogoutButton />
             </div>
         </nav>
     );

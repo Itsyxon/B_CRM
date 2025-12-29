@@ -13,7 +13,7 @@ const HelpRequests = () => {
         return (
             <div>
                 <h1 className='text-xl font-semibold mb-4'>Мои обращения</h1>
-                <p className="text-gray-500">У вас пока нет обращений в техническую поддержку</p>
+                <p className="text-[var(--accent-gray)]">У вас пока нет обращений в техническую поддержку</p>
             </div>
         )
     }
@@ -32,7 +32,7 @@ const HelpRequests = () => {
                                 ID: {request.id}
                             </span>
                         </div>
-                        <p className="text-gray-800 truncate">{request.text.slice(0, 50)}...</p>
+                        <p className="text-[var(--accent-gray)] truncate">{request.text.slice(0, 50)}...</p>
                     </div>
                 ))}
             </div>

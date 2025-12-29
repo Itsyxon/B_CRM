@@ -27,9 +27,9 @@ const DashboardNews = () => {
     }
 
     return (
-        <Content className="w-full flex flex-col">
+        <Content className="w-full flex flex-col justify-between h-[533px]">
             <div className="text-xl text-[var(--secondary)] font-semibold">Лента <span className="text-sm align-top text-[var(--secondary)]">{total}</span></div>
-            <div className="flex flex-col gap-4 my-4">
+            <div className="flex flex-col gap-4 my-4 overflow-y-auto">
                 {allNews.map((item) => (
                     <div key={item.id}>
                         <h2 className="text-xl mb-2 text-[var(--info)]">{item.title}</h2>
@@ -41,8 +41,9 @@ const DashboardNews = () => {
                         </div>
                     </div>
                 ))}
+                {isFetchingNextPage && <Loader className="mx-auto w-24 h-24" />}
             </div>
-            {hasNextPage && (
+            {hasNextPage ? (
                 <Button
                     onClick={() => fetchNextPage()}
                     disabled={isFetchingNextPage}
@@ -50,7 +51,7 @@ const DashboardNews = () => {
                 >
                     {isFetchingNextPage ? 'Загрузка...' : 'Загрузить еще'}
                 </Button>
-            )}
+            ) : <p className="text-[var(--accent-gray)] text-center">Показаны все новости</p>}
         </Content>
     );
 };
