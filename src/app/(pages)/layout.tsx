@@ -7,10 +7,13 @@ const PagesLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <div>
             <NavBar />
-            <UserPanel />
-            <main className='md:ml-[250px] p-4 md:p-8'>
-                <Header />
-                {children}</main>
+            <div className='md:ml-[250px]'>
+                <UserPanel />
+                <main className='p-4 md:p-8'>
+                    <Header />
+                    {children}
+                </main>
+            </div>
         </div>
     );
 };

@@ -14,8 +14,8 @@ const SettingsTabs = ({ activeTab, onTabChange }: SettingsTabsProps) => {
 
     const getTabClassName = (tabValue: SettingsTab) => {
         const baseClasses = 'cursor-pointer rounded-t-lg py-2 px-6 transition-colors duration-200';
-        const activeClasses = 'bg-[var(--tertiary)]';
-        const inactiveClasses = 'bg-[var(--accent-gray)]/20 hover:bg-[var(--accent-gray)]/40';
+        const activeClasses = 'bg-[var(--tertiary)] font-medium text-[var(--foreground)]';
+        const inactiveClasses = 'bg-[var(--accent-gray)]/15 text-[var(--accent-gray)] hover:bg-[var(--accent-gray)]/25 hover:text-[var(--foreground)]';
 
         return `${baseClasses} ${activeTab === tabValue ? activeClasses : inactiveClasses}`;
     };

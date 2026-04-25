@@ -25,7 +25,7 @@ const Checkbox = ({
         className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors cursor-pointer shrink-0
             ${checked
                 ? 'bg-[var(--info)] border-[var(--info)]'
-                : 'bg-[var(--input-bg)] border-[var(--border)] hover:border-[var(--info)]'
+                : 'bg-[var(--input-bg)] border-[var(--accent-gray)] hover:border-[var(--info)]'
             }`}
     >
         {checked && <Check size={11} className="text-white" strokeWidth={3} />}
@@ -41,8 +41,8 @@ const Row = ({
     description?: string
     children: React.ReactNode
 }) => (
-    <div className="flex items-center py-2.5">
-        <div className="w-[300px] shrink-0">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 py-2.5">
+        <div className="sm:w-[300px] sm:shrink-0 flex-1">
             <p className="text-sm font-medium text-[var(--foreground)]">{label}</p>
             {description && (
                 <p className="text-xs text-[var(--accent-gray)] mt-0.5">{description}</p>

@@ -5,70 +5,61 @@ import {
     CategoryScale,
     LinearScale,
     BarElement,
-    Title,
     Tooltip,
     Legend,
     ChartOptions
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 ChartJS.defaults.plugins.tooltip.backgroundColor = '#fff'
 ChartJS.defaults.plugins.tooltip.bodyColor = '#000'
 ChartJS.defaults.plugins.tooltip.titleColor = '#000'
-ChartJS.defaults.plugins.tooltip.cornerRadius = 4
-ChartJS.defaults.plugins.tooltip.boxWidth = 20
-ChartJS.defaults.plugins.tooltip.boxHeight = 20
-ChartJS.defaults.plugins.tooltip.borderWidth = 2
-ChartJS.defaults.plugins.tooltip.borderColor = '#F6F6F6'
+ChartJS.defaults.plugins.tooltip.cornerRadius = 6
+ChartJS.defaults.plugins.tooltip.boxWidth = 10
+ChartJS.defaults.plugins.tooltip.boxHeight = 10
+ChartJS.defaults.plugins.tooltip.borderWidth = 1
+ChartJS.defaults.plugins.tooltip.borderColor = '#e5e7eb'
 
 const DataYearBar = ({ yearData }: { yearData: number[] }) => {
     const data = {
         labels: months,
         datasets: [
             {
-                label: 'Данные за год',
+                label: 'Продажи',
                 data: yearData,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
+                backgroundColor: 'rgba(60, 158, 255, 0.15)',
+                borderColor: 'rgba(60, 158, 255, 0.9)',
+                borderWidth: 2,
+                borderRadius: 6,
+                borderSkipped: false,
             }
         ],
     };
 
     const options: ChartOptions<'bar'> = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-            legend: {
-                position: 'top' as const,
-            },
-            title: {
-                display: true,
-                text: 'Данные по месяцам года',
-            },
+            legend: { display: false },
         },
         scales: {
+            x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 } },
+            },
             y: {
                 beginAtZero: true,
+                grid: { color: 'rgba(0,0,0,0.05)' },
+                ticks: { font: { size: 11 } },
             },
         },
     };
 
     return (
-        <div className='w-full h-[220px] sm:h-[260px] lg:h-[300px]'>
-            <Bar data={data} options={{
-                ...options,
-                responsive: true,
-                maintainAspectRatio: false
-            }} />
+        <div className='w-full h-[200px] sm:h-[230px]'>
+            <Bar data={data} options={options} />
         </div>
     );
 };

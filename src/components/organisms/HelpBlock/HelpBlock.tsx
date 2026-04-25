@@ -12,9 +12,9 @@ const HelpBlock = () => {
     }, []);
 
     return (
-        <div className='flex gap-8'>
+        <div className="flex flex-col md:flex-row gap-5 md:items-start">
             <HelpForm handleFormSubmit={handleFormSubmit} />
-            <div className='flex flex-col gap-2 w-full'>
+            <div className="flex flex-col gap-4 flex-1 min-w-0">
                 <HelpMessage isSubmitted={isSubmitted} />
                 <HelpRequests />
             </div>

@@ -1,11 +1,14 @@
-import React from 'react';
+import { Suspense } from 'react'
+import ProjectsGrid from '@/components/organisms/ProjectsGrid/ProjectsGrid'
 
 const ProjectsPage = () => {
-    return (
-        <div>
+  return (
+    <div>
+      <Suspense>
+        <ProjectsGrid />
+      </Suspense>
+    </div>
+  )
+}
 
-        </div>
-    );
-};
-
-export default ProjectsPage;
+export default ProjectsPage

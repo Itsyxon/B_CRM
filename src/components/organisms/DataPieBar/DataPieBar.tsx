@@ -5,47 +5,62 @@ import {
     Legend,
     ArcElement
 } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
+import { Doughnut } from 'react-chartjs-2';
 
-ChartJS.register(
-    ArcElement,
-    Legend,
-    Tooltip,
-);
+ChartJS.register(ArcElement, Legend, Tooltip);
+
 ChartJS.defaults.plugins.tooltip.backgroundColor = '#fff'
 ChartJS.defaults.plugins.tooltip.bodyColor = '#000'
 ChartJS.defaults.plugins.tooltip.titleColor = '#000'
-ChartJS.defaults.plugins.tooltip.cornerRadius = 4
-ChartJS.defaults.plugins.tooltip.boxWidth = 20
-ChartJS.defaults.plugins.tooltip.boxHeight = 20
-ChartJS.defaults.plugins.tooltip.borderWidth = 2
-ChartJS.defaults.plugins.tooltip.borderColor = '#F6F6F6'
+ChartJS.defaults.plugins.tooltip.cornerRadius = 6
+ChartJS.defaults.plugins.tooltip.borderWidth = 1
+ChartJS.defaults.plugins.tooltip.borderColor = '#e5e7eb'
+
+const COLORS = [
+    'rgba(60, 158, 255, 0.8)',
+    'rgba(52, 211, 153, 0.8)',
+    'rgba(251, 191, 36, 0.8)',
+    'rgba(167, 139, 250, 0.8)',
+    'rgba(251, 113, 133, 0.8)',
+    'rgba(251, 146, 60, 0.8)',
+    'rgba(129, 140, 248, 0.8)',
+    'rgba(94, 234, 212, 0.8)',
+]
 
 const DataPieBar = ({ clientsData }: { clientsData: number[] }) => {
     const data = {
         datasets: [
             {
-                label: 'Новые клиенты',
+                label: 'Клиенты',
                 data: clientsData,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)',
-                    'rgba(199, 199, 199, 0.6)',
-                    'rgba(83, 102, 255, 0.6)',
-                ],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
+                backgroundColor: COLORS.slice(0, clientsData.length),
+                borderColor: 'transparent',
+                borderWidth: 0,
+                hoverOffset: 6,
             }
         ],
     };
 
     return (
-        <div className='w-full max-w-[255px] mx-auto h-[220px] sm:h-[255px] lg:h-[285px]'>
-            <Pie data={data} />
+        <div className='w-full max-w-[220px] mx-auto h-[190px] sm:h-[220px]'>
+            <Doughnut
+                data={data}
+                options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                padding: 10,
+                                font: { size: 11 },
+                            },
+                        },
+                    },
+                }}
+            />
         </div>
     );
 };
