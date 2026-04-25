@@ -4,7 +4,7 @@ const TextArea = ({ className = '', ...props }: { className?: string } & Compone
     return (
         <textarea
             {...props}
-            className={`${className} bg-[var(--tertiary)] rounded-lg px-2 py-1 text-black focus:outline-0 border border-gray-300 text-sm resize-y min-h-[100px]`}
+            className={`${className} bg-[var(--input-bg)] rounded-lg px-2 py-1 text-[var(--foreground)] focus:outline-none focus:border-[var(--info)] border border-[var(--border)] text-sm resize-y min-h-[100px] transition-colors`}
         />
     );
 };

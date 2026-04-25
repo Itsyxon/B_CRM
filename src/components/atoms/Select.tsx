@@ -4,7 +4,7 @@ const Select = ({ className = '', children, ...props }: { className?: string } &
     return (
         <select
             {...props}
-            className={`${className} bg-[var(--tertiary)] rounded-lg p-3 text-black focus:outline-0 border border-gray-300 text-md`}
+            className={`${className} bg-[var(--input-bg)] rounded-lg p-3 text-[var(--foreground)] focus:outline-none focus:border-[var(--info)] border border-[var(--border)] text-md transition-colors`}
         >
             {children}
         </select>

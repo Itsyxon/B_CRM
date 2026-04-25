@@ -8,8 +8,7 @@ const PagesLayout = ({ children }: { children: React.ReactNode }) => {
         <div>
             <NavBar />
             <UserPanel />
-            <main className='ml-[250px] p-8'
-            >
+            <main className='md:ml-[250px] p-4 md:p-8'>
                 <Header />
                 {children}</main>
         </div>

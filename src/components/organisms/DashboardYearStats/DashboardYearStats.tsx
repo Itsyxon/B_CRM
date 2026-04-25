@@ -3,7 +3,7 @@ import DataDiagram from '../DataDiagram/DataDiagram';
 
 const DashboardYearStats = () => {
     return (
-        <div className='flex gap-8'>
+        <div className='flex flex-col xl:flex-row gap-6'>
             <DataYear />
             <DataDiagram />
         </div>

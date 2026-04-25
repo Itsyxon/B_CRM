@@ -8,8 +8,24 @@
   --navbar: #F3F3F5;
   --info: #3C9EFF;
   --accent-gray: #9EABB7;
+  --border: #e5e7eb;
+  --skeleton: #e8eaed;
+  --input-bg: #ffffff;
   --font-primary: 'Roboto', sans-serif;
   --font-accent: 'Montserrat', sans-serif;
+}
+
+.dark {
+  --background: #111118;
+  --foreground: #e2e2ea;
+  --secondary: #b8b8c8;
+  --tertiary: #1c1c26;
+  --navbar: #16161e;
+  --info: #3C9EFF;
+  --accent-gray: #6b7585;
+  --border: #2c2c3a;
+  --skeleton: #242432;
+  --input-bg: #1c1c26;
 }
 
 @theme inline {
@@ -18,26 +34,6 @@
   --font-sans: var(--font-primary);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-family-accent: var(--font-accent);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ededed;
-    --foreground: #0a0a0a;
-    --tertiary: #ffffff;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
-    --secondary: #2b2b38;
-    --tertiary: #ffffff;
-    --navbar: #F3F3F5;
-    --info: #3C9EFF;
-    --accent-gray: #9EABB7;
-  }
 }
 
 @utility font-secondary {
@@ -57,4 +53,5 @@ body {
   color: var(--foreground);
   font-family: "Roboto", sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
