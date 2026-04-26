@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { UserType } from '@/types/UserTypes'
 import { ColumnDef } from '@tanstack/react-table'
@@ -48,16 +48,11 @@ const UsersActionsCell = ({ user }: { user: UserType }) => {
     setOpen((p) => !p)
   }
 
-  useEffect(() => {
-    if (!open) return
-    const close = () => setOpen(false)
-    document.addEventListener('mousedown', close)
-    window.addEventListener('scroll', close, true)
-    return () => {
-      document.removeEventListener('mousedown', close)
-      window.removeEventListener('scroll', close, true)
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setOpen(false)
     }
-  }, [open])
+  }
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(user.email).then(() => {
@@ -76,7 +71,7 @@ const UsersActionsCell = ({ user }: { user: UserType }) => {
     <div
       className='fixed z-[200] w-56 bg-[var(--tertiary)] border border-[var(--border)] rounded-xl shadow-xl py-1.5 px-1'
       style={{ top: dropPos.top, right: dropPos.right }}
-      onMouseDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.preventDefault()}
     >
       <button className={item} onClick={() => setOpen(false)}>
         <UserPlus size={14} className='text-[var(--info)] shrink-0' />
@@ -112,14 +107,16 @@ const UsersActionsCell = ({ user }: { user: UserType }) => {
 
   return (
     <>
-      <button
-        ref={btnRef}
-        onClick={handleToggle}
-        className='w-8 h-8 flex items-center justify-center rounded-lg text-[var(--accent-gray)] hover:text-[var(--secondary)] hover:bg-[var(--navbar)] transition-colors cursor-pointer'
-      >
-        <MoreHorizontal size={16} />
-      </button>
-      {createPortal(dropdown, document.body)}
+      <div tabIndex={-1} className='outline-none' onBlur={handleBlur}>
+        <button
+          ref={btnRef}
+          onClick={handleToggle}
+          className='w-8 h-8 flex items-center justify-center rounded-lg text-[var(--accent-gray)] hover:text-[var(--secondary)] hover:bg-[var(--navbar)] transition-colors cursor-pointer'
+        >
+          <MoreHorizontal size={16} />
+        </button>
+      </div>
+      {open && createPortal(dropdown, document.body)}
     </>
   )
 }

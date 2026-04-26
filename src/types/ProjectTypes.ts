@@ -7,6 +7,7 @@ export interface Project {
   description: string
   author: string
   authorId: number
+  assignees?: { id: number; name: string }[]
   status: ProjectStatus
   priority: ProjectPriority
   progress: number

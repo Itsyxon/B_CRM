@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Check } from 'lucide-react'
 import Link from 'next/link'
 import Divider from '@/components/atoms/Divider'
@@ -61,10 +61,6 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 const CommonForm = () => {
     const { common, updateCommon } = useSettings()
     const [companyName, setCompanyName] = useState(common.companyName)
-
-    useEffect(() => {
-        setCompanyName(common.companyName)
-    }, [common.companyName])
 
     const set = <K extends keyof CommonSettings>(key: K, value: CommonSettings[K]) => {
         updateCommon({ ...common, [key]: value })

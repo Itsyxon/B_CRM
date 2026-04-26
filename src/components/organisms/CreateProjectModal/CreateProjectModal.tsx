@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Briefcase, CheckCircle2, Search } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -56,130 +56,116 @@ function initials(name: string) {
     .slice(0, 2)
 }
 
-// ── Assignee combobox ─────────────────────────────────────────────────────────
-interface ComboboxProps {
+interface MultiComboboxProps {
   staff: UserType[]
-  value: UserType | null
-  onChange: (v: UserType | null) => void
+  value: UserType[]
+  onChange: (v: UserType[]) => void
 }
 
-const AssigneeCombobox = ({ staff, value, onChange }: ComboboxProps) => {
-  const [search, setSearch] = useState(value?.name ?? '')
+const MultiAssigneeSelector = ({
+  staff,
+  value,
+  onChange,
+}: MultiComboboxProps) => {
+  const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
-  const [activeIdx, setActiveIdx] = useState(-1)
   const [rect, setRect] = useState<DOMRect | null>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const selectedIds = new Set(value.map((u) => u.id))
+  const available = staff.filter((s) => !selectedIds.has(s.id))
   const filtered = search.trim()
-    ? staff.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
-    : staff
+    ? available.filter(
+        (s) =>
+          s.name.toLowerCase().includes(search.toLowerCase()) ||
+          s.role?.toLowerCase().includes(search.toLowerCase()),
+      )
+    : available
+
+  const updateRect = () => {
+    if (wrapRef.current) setRect(wrapRef.current.getBoundingClientRect())
+  }
 
   const openDrop = () => {
-    if (wrapRef.current) setRect(wrapRef.current.getBoundingClientRect())
+    updateRect()
     setOpen(true)
-    setActiveIdx(-1)
   }
 
   const pick = (s: UserType) => {
-    onChange(s)
-    setSearch(s.name)
-    setOpen(false)
-  }
-
-  const clear = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onChange(null)
+    onChange([...value, s])
     setSearch('')
-    setOpen(false)
     setTimeout(() => {
-      openDrop()
+      updateRect()
       inputRef.current?.focus()
     }, 0)
   }
 
-  // close on outside click
-  useEffect(() => {
-    const fn = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', fn)
-    return () => document.removeEventListener('mousedown', fn)
-  }, [])
+  const remove = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    onChange(value.filter((u) => u.id !== id))
+    if (open) setTimeout(updateRect, 0)
+  }
 
-  // close on scroll (dropdown is fixed-positioned)
-  useEffect(() => {
-    if (!open) return
-    const fn = () => setOpen(false)
-    document.addEventListener('scroll', fn, true)
-    return () => document.removeEventListener('scroll', fn, true)
-  }, [open])
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (!open) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        openDrop()
-        setActiveIdx(0)
-      }
-      return
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setActiveIdx((i) => Math.min(i + 1, filtered.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActiveIdx((i) => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      if (activeIdx >= 0 && filtered[activeIdx]) pick(filtered[activeIdx])
-    } else if (e.key === 'Escape') {
+  // Close when focus leaves this component entirely.
+  // React's onBlur bubbles (uses native focusout), so it fires for any child blur.
+  // onMouseDown preventDefault on the portal prevents blur on genuine picks.
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setOpen(false)
     }
   }
 
-  const isSelected = !!value && search === value.name
-
   return (
-    <div ref={wrapRef}>
+    <div
+      ref={wrapRef}
+      tabIndex={-1}
+      className='outline-none'
+      onBlur={handleBlur}
+    >
       <div
-        className={`${field} flex items-center gap-2 cursor-text ${open ? 'border-[var(--info)] ring-2 ring-[var(--info)]/15' : ''}`}
+        className={`${field} flex flex-wrap items-center gap-1.5 cursor-text min-h-[40px] py-2 ${open ? 'border-[var(--info)] ring-2 ring-[var(--info)]/15' : ''}`}
         onClick={() => {
-          if (!open) {
-            openDrop()
-            inputRef.current?.focus()
-          }
+          openDrop()
+          inputRef.current?.focus()
         }}
       >
-        {isSelected && (
-          <div className='w-5 h-5 rounded-full bg-[var(--info)]/20 flex items-center justify-center text-[9px] font-bold text-[var(--info)] shrink-0'>
-            {initials(value!.name)}
-          </div>
-        )}
+        {value.map((u) => (
+          <span
+            key={u.id}
+            className='inline-flex items-center gap-1 bg-[var(--info)]/15 text-[var(--info)] rounded-md px-1.5 py-0.5 text-[11px] font-medium shrink-0'
+          >
+            <span className='w-3.5 h-3.5 rounded-full bg-[var(--info)] flex items-center justify-center text-[7px] font-bold text-white'>
+              {initials(u.name)}
+            </span>
+            {u.name.split(' ')[0]}
+            <button
+              type='button'
+              onClick={(e) => remove(u.id, e)}
+              className='hover:text-rose-500 transition-colors cursor-pointer ml-0.5'
+            >
+              <X size={9} />
+            </button>
+          </span>
+        ))}
         <input
           ref={inputRef}
           value={search}
           onChange={(e) => {
-            const v = e.target.value
-            setSearch(v)
-            if (value && v !== value.name) onChange(null)
+            setSearch(e.target.value)
             if (!open) openDrop()
-            setActiveIdx(-1)
           }}
           onFocus={openDrop}
-          onKeyDown={onKeyDown}
-          placeholder='Поиск по имени...'
-          className='flex-1 min-w-0 bg-transparent outline-none text-sm text-[var(--foreground)] placeholder:text-[var(--accent-gray)]'
+          onKeyDown={(e) => {
+            if (e.key === 'Escape' && open) {
+              e.stopPropagation()
+              setOpen(false)
+            }
+          }}
+          placeholder={value.length === 0 ? 'Поиск по имени или роли' : ''}
+          className='flex-1 min-w-[80px] bg-transparent outline-none text-sm text-[var(--foreground)] placeholder:text-[var(--accent-gray)]'
         />
-        {isSelected ? (
-          <button
-            type='button'
-            onClick={clear}
-            className='shrink-0 text-[var(--accent-gray)] hover:text-[var(--foreground)] transition-colors cursor-pointer'
-          >
-            <X size={13} />
-          </button>
-        ) : (
+        {value.length === 0 && (
           <Search
             size={13}
             className='shrink-0 text-[var(--accent-gray)] pointer-events-none'
@@ -191,25 +177,24 @@ const AssigneeCombobox = ({ staff, value, onChange }: ComboboxProps) => {
         rect &&
         createPortal(
           <div
+            onMouseDown={(e) => e.preventDefault()}
             className='fixed z-[200] bg-[var(--background)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden'
             style={{ top: rect.bottom + 4, left: rect.left, width: rect.width }}
           >
             {filtered.length === 0 ? (
               <p className='px-3 py-3 text-sm text-[var(--accent-gray)] text-center'>
-                Не найдено
+                {available.length === 0
+                  ? 'Все сотрудники добавлены'
+                  : 'Не найдено'}
               </p>
             ) : (
               <ul className='max-h-[200px] overflow-y-auto'>
-                {filtered.map((s, i) => (
+                {filtered.map((s) => (
                   <li key={s.id}>
                     <button
                       type='button'
                       onMouseDown={() => pick(s)}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors cursor-pointer ${
-                        i === activeIdx
-                          ? 'bg-[var(--info)]/10'
-                          : 'hover:bg-[var(--border)]'
-                      }`}
+                      className='w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors cursor-pointer hover:bg-[var(--border)]'
                     >
                       <div className='w-7 h-7 rounded-full bg-[var(--info)]/15 flex items-center justify-center shrink-0 text-[10px] font-bold text-[var(--info)]'>
                         {initials(s.name)}
@@ -236,13 +221,12 @@ const AssigneeCombobox = ({ staff, value, onChange }: ComboboxProps) => {
   )
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
 const CreateProjectModal = ({ onClose }: Props) => {
   const { data: staff = [] } = useStaff()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [assignee, setAssignee] = useState<UserType | null>(null)
+  const [assignees, setAssignees] = useState<UserType[]>([])
   const [priority, setPriority] = useState<ProjectPriority>('medium')
   const [status, setStatus] = useState<ProjectStatus>('active')
   const [deadline, setDeadline] = useState('')
@@ -250,16 +234,6 @@ const CreateProjectModal = ({ onClose }: Props) => {
   const [success, setSuccess] = useState(false)
 
   const titleRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    titleRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const qc = useQueryClient()
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -273,8 +247,9 @@ const CreateProjectModal = ({ onClose }: Props) => {
       id: Date.now(),
       name: title.trim(),
       description: description.trim(),
-      author: assignee?.name ?? '—',
-      authorId: assignee?.id ?? 0,
+      author: assignees[0]?.name ?? '—',
+      authorId: assignees[0]?.id ?? 0,
+      assignees: assignees.map((a) => ({ id: a.id, name: a.name })),
       status,
       priority,
       progress: 0,
@@ -286,7 +261,7 @@ const CreateProjectModal = ({ onClose }: Props) => {
       createdAt: new Date().toISOString().split('T')[0],
       tags: [],
       budget: '—',
-      teamSize: 1,
+      teamSize: Math.max(1, assignees.length),
     }
     qc.setQueryData<Project[]>(['projects'], (old = []) => [newProject, ...old])
     setSuccess(true)
@@ -300,6 +275,9 @@ const CreateProjectModal = ({ onClose }: Props) => {
       className='fixed inset-0 z-[100] flex items-center justify-center p-4'
       aria-modal='true'
       role='dialog'
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose()
+      }}
     >
       <div
         className='absolute inset-0 bg-black/40 backdrop-blur-sm'
@@ -374,22 +352,22 @@ const CreateProjectModal = ({ onClose }: Props) => {
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder='Краткое описание целей, задач и ожидаемого результата...'
+                    placeholder='Краткое описание целей, задач и ожидаемого результата'
                     rows={3}
                     className={`${field} resize-none`}
                   />
                 </div>
 
-                <div className='grid grid-cols-2 gap-3'>
-                  <div>
-                    <p className={label}>Ответственный</p>
-                    <AssigneeCombobox
-                      staff={staff}
-                      value={assignee}
-                      onChange={setAssignee}
-                    />
-                  </div>
+                <div>
+                  <p className={label}>Ответственные</p>
+                  <MultiAssigneeSelector
+                    staff={staff}
+                    value={assignees}
+                    onChange={setAssignees}
+                  />
+                </div>
 
+                <div className='grid grid-cols-2 gap-3'>
                   <div>
                     <p className={label}>Приоритет</p>
                     <div className='flex rounded-lg border border-[var(--border)] overflow-hidden bg-[var(--background)]'>
@@ -407,9 +385,7 @@ const CreateProjectModal = ({ onClose }: Props) => {
                       ))}
                     </div>
                   </div>
-                </div>
 
-                <div className='grid grid-cols-2 gap-3'>
                   <div>
                     <p className={label}>Статус</p>
                     <select
@@ -426,17 +402,17 @@ const CreateProjectModal = ({ onClose }: Props) => {
                       ))}
                     </select>
                   </div>
+                </div>
 
-                  <div>
-                    <p className={label}>Дедлайн</p>
-                    <input
-                      type='date'
-                      value={deadline}
-                      onChange={(e) => setDeadline(e.target.value)}
-                      min={todayMin}
-                      className={`${field} cursor-pointer`}
-                    />
-                  </div>
+                <div>
+                  <p className={label}>Дедлайн</p>
+                  <input
+                    type='date'
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    min={todayMin}
+                    className={`${field} cursor-pointer`}
+                  />
                 </div>
               </div>
 

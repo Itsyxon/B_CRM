@@ -5,12 +5,17 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  DollarSign,
   Plus,
   Search,
+  Tag,
+  TrendingUp,
   Users,
   X,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Content from '@/components/atoms/Content'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import CreateProjectModal from '@/components/organisms/CreateProjectModal/CreateProjectModal'
@@ -105,7 +110,13 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 const VALID_FILTERS = FILTERS.map((f) => f.value)
 
-const ProjectCard = ({ project }: { project: Project }) => {
+const ProjectDetailModal = ({
+  project,
+  onClose,
+}: {
+  project: Project
+  onClose: () => void
+}) => {
   const sm = statusMeta[project.status]
   const pm = priorityMeta[project.priority]
   const pc = progressColor(project.progress)
@@ -114,8 +125,250 @@ const ProjectCard = ({ project }: { project: Project }) => {
     project.status !== 'cancelled' &&
     new Date(project.deadline) < new Date()
 
+  const displayAssignees = project.assignees?.length
+    ? project.assignees
+    : project.author && project.author !== '—'
+      ? [{ id: project.authorId, name: project.author }]
+      : []
+
+  return createPortal(
+    <div
+      className='fixed inset-0 z-[150] flex items-end sm:items-center justify-center sm:p-4'
+      aria-modal='true'
+      role='dialog'
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
+    >
+      <div
+        className='absolute inset-0 bg-black/50 backdrop-blur-sm'
+        onClick={onClose}
+      />
+
+      <div className='relative z-10 w-full sm:max-w-2xl bg-[var(--tertiary)] border border-[var(--border)] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh]'>
+        {/* Header */}
+        <div className='px-5 sm:px-6 py-4 sm:py-5 border-b border-[var(--border)] shrink-0'>
+          <div className='flex items-start justify-between gap-3'>
+            <div className='flex-1 min-w-0'>
+              <div className='flex flex-wrap items-center gap-2 mb-2'>
+                <span
+                  className={`flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${sm.badge}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${sm.dot}`} />
+                  {sm.label}
+                </span>
+                <span
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${pm.cls}`}
+                >
+                  {pm.label}
+                </span>
+                {isOverdue && (
+                  <span className='text-[10px] font-semibold px-2 py-0.5 rounded-full text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/10'>
+                    Просрочен
+                  </span>
+                )}
+              </div>
+              <h2 className='text-lg sm:text-xl font-bold text-[var(--secondary)] leading-tight'>
+                {project.name}
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className='w-8 h-8 flex items-center justify-center rounded-lg text-[var(--accent-gray)] hover:text-[var(--secondary)] hover:bg-[var(--navbar)] transition-colors cursor-pointer shrink-0'
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable body */}
+        <div className='overflow-y-auto flex-1 px-5 sm:px-6 py-5 space-y-5'>
+          {/* Description */}
+          {project.description ? (
+            <div>
+              <p className='text-xs font-semibold text-[var(--accent-gray)] uppercase tracking-wide mb-2'>
+                Описание
+              </p>
+              <p className='text-sm text-[var(--foreground)] leading-relaxed'>
+                {project.description}
+              </p>
+            </div>
+          ) : (
+            <p className='text-sm text-[var(--accent-gray)] italic'>
+              Описание не указано
+            </p>
+          )}
+
+          {/* Progress */}
+          <div className='bg-[var(--navbar)] rounded-xl p-4'>
+            <div className='flex items-center justify-between mb-2.5'>
+              <div className='flex items-center gap-1.5 text-sm font-medium text-[var(--secondary)]'>
+                <TrendingUp size={14} className='text-[var(--accent-gray)]' />
+                Прогресс
+              </div>
+              <span
+                className={`text-xl font-bold ${project.progress === 100 ? 'text-blue-500' : 'text-[var(--secondary)]'}`}
+              >
+                {project.progress}%
+              </span>
+            </div>
+            <div className='h-2 w-full bg-[var(--border)] rounded-full overflow-hidden'>
+              <div
+                className={`h-full rounded-full transition-all duration-700 ${pc}`}
+                style={{ width: `${project.progress}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Info grid */}
+          <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
+            <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
+              <div className='flex items-center gap-1 mb-1.5'>
+                <CalendarDays
+                  size={11}
+                  className='text-[var(--accent-gray)] shrink-0'
+                />
+                <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
+                  Дедлайн
+                </p>
+              </div>
+              <p
+                className={`text-sm font-semibold leading-snug ${isOverdue ? 'text-rose-500' : 'text-[var(--secondary)]'}`}
+              >
+                {formatDate(project.deadline)}
+              </p>
+            </div>
+
+            <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
+              <div className='flex items-center gap-1 mb-1.5'>
+                <Users
+                  size={11}
+                  className='text-[var(--accent-gray)] shrink-0'
+                />
+                <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
+                  Команда
+                </p>
+              </div>
+              <p className='text-sm font-semibold text-[var(--secondary)]'>
+                {project.teamSize} чел.
+              </p>
+            </div>
+
+            <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
+              <div className='flex items-center gap-1 mb-1.5'>
+                <DollarSign
+                  size={11}
+                  className='text-[var(--accent-gray)] shrink-0'
+                />
+                <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
+                  Бюджет
+                </p>
+              </div>
+              <p className='text-sm font-semibold text-[var(--secondary)]'>
+                {project.budget}
+              </p>
+            </div>
+
+            <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
+              <div className='flex items-center gap-1 mb-1.5'>
+                <Clock
+                  size={11}
+                  className='text-[var(--accent-gray)] shrink-0'
+                />
+                <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
+                  Создан
+                </p>
+              </div>
+              <p className='text-sm font-semibold text-[var(--secondary)] leading-snug'>
+                {formatDate(project.createdAt)}
+              </p>
+            </div>
+          </div>
+
+          {/* Tags */}
+          {project.tags.length > 0 && (
+            <div>
+              <div className='flex items-center gap-1.5 mb-2'>
+                <Tag size={11} className='text-[var(--accent-gray)]' />
+                <p className='text-xs font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
+                  Теги
+                </p>
+              </div>
+              <div className='flex flex-wrap gap-2'>
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className='text-xs font-medium px-2.5 py-1 rounded-full bg-[var(--navbar)] text-[var(--accent-gray)] border border-[var(--border)]'
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Assignees */}
+          {displayAssignees.length > 0 && (
+            <div>
+              <div className='flex items-center gap-1.5 mb-2'>
+                <Users size={11} className='text-[var(--accent-gray)]' />
+                <p className='text-xs font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
+                  Ответственные
+                </p>
+              </div>
+              <div className='flex flex-wrap gap-2'>
+                {displayAssignees.map((a) => (
+                  <div
+                    key={a.id}
+                    className='flex items-center gap-2 bg-[var(--navbar)] border border-[var(--border)] rounded-full pl-1 pr-3 py-1'
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-full ${getColor(a.id)} flex items-center justify-center shrink-0`}
+                    >
+                      <span className='text-white text-[9px] font-bold'>
+                        {getInitials(a.name)}
+                      </span>
+                    </div>
+                    <span className='text-sm font-medium text-[var(--secondary)]'>
+                      {a.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+// ── Project Card ──────────────────────────────────────────────────────────────
+const ProjectCard = ({
+  project,
+  onClick,
+}: {
+  project: Project
+  onClick: () => void
+}) => {
+  const sm = statusMeta[project.status]
+  const pm = priorityMeta[project.priority]
+  const pc = progressColor(project.progress)
+  const isOverdue =
+    project.status !== 'completed' &&
+    project.status !== 'cancelled' &&
+    new Date(project.deadline) < new Date()
+
+  const displayAssignees = project.assignees?.length
+    ? project.assignees
+    : project.author && project.author !== '—'
+      ? [{ id: project.authorId, name: project.author }]
+      : []
+
   return (
-    <div className='rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-5 flex flex-col gap-4 hover:border-[var(--info)]/40 hover:shadow-md transition-all'>
+    <div
+      onClick={onClick}
+      className='rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-5 flex flex-col gap-4 hover:border-[var(--info)]/40 hover:shadow-md transition-all cursor-pointer group'
+    >
       <div className='flex items-start justify-between gap-2'>
         <div className='flex flex-wrap gap-1.5'>
           {project.tags.map((tag) => (
@@ -135,7 +388,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
       </div>
 
       <div>
-        <h3 className='text-sm font-semibold text-[var(--secondary)] leading-snug mb-1'>
+        <h3 className='text-sm font-semibold text-[var(--secondary)] leading-snug mb-1 group-hover:text-[var(--info)] transition-colors'>
           {project.name}
         </h3>
         <p className='text-xs text-[var(--accent-gray)] line-clamp-2 leading-relaxed'>
@@ -161,17 +414,28 @@ const ProjectCard = ({ project }: { project: Project }) => {
       </div>
 
       <div className='flex items-center justify-between gap-2 pt-1 border-t border-[var(--border)]'>
-        <div className='flex items-center gap-2 min-w-0'>
-          <div
-            className={`w-6 h-6 rounded-full ${getColor(project.authorId)} flex items-center justify-center shrink-0`}
-          >
-            <span className='text-white text-[9px] font-bold'>
-              {getInitials(project.author)}
-            </span>
-          </div>
-          <span className='text-xs text-[var(--accent-gray)] truncate'>
-            {project.author}
-          </span>
+        <div className='flex items-center'>
+          {displayAssignees.slice(0, 3).map((a, i) => (
+            <div
+              key={a.id}
+              className={`w-6 h-6 rounded-full ${getColor(a.id)} flex items-center justify-center border-2 border-[var(--tertiary)] ${i > 0 ? '-ml-1.5' : ''}`}
+              title={a.name}
+            >
+              <span className='text-white text-[8px] font-bold'>
+                {getInitials(a.name)}
+              </span>
+            </div>
+          ))}
+          {displayAssignees.length > 3 && (
+            <div className='w-6 h-6 rounded-full bg-[var(--navbar)] border-2 border-[var(--tertiary)] -ml-1.5 flex items-center justify-center'>
+              <span className='text-[8px] font-bold text-[var(--accent-gray)]'>
+                +{displayAssignees.length - 3}
+              </span>
+            </div>
+          )}
+          {displayAssignees.length === 0 && (
+            <span className='text-xs text-[var(--accent-gray)]'>—</span>
+          )}
         </div>
 
         <div className='flex items-center gap-3 shrink-0 text-xs text-[var(--accent-gray)]'>
@@ -223,8 +487,6 @@ const SkeletonCard = () => (
   </div>
 )
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
 const ProjectsGrid = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -233,6 +495,7 @@ const ProjectsGrid = () => {
   const { data: projects, isLoading, isError } = useProjects()
 
   const [modalOpen, setModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   const [filter, setFilter] = useState<Filter>(() => {
     const f = searchParams.get('filter')
@@ -328,6 +591,12 @@ const ProjectsGrid = () => {
   return (
     <>
       {modalOpen && <CreateProjectModal onClose={() => setModalOpen(false)} />}
+      {selectedProject && (
+        <ProjectDetailModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
 
       <div className='space-y-5'>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
@@ -414,7 +683,11 @@ const ProjectsGrid = () => {
         ) : (
           <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
             {paginated.map((p) => (
-              <ProjectCard key={p.id} project={p} />
+              <ProjectCard
+                key={p.id}
+                project={p}
+                onClick={() => setSelectedProject(p)}
+              />
             ))}
           </div>
         )}

@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Check } from 'lucide-react'
 import Divider from '@/components/atoms/Divider'
 import ThemeToggle from '@/components/molecules/ThemeToggle'

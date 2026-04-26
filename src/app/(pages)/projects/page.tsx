@@ -4,7 +4,7 @@ import ProjectsGrid from '@/components/organisms/ProjectsGrid/ProjectsGrid'
 const ProjectsPage = () => {
   return (
     <div>
-      <Suspense>
+      <Suspense fallback='Загрузка...'>
         <ProjectsGrid />
       </Suspense>
     </div>

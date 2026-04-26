@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { UserPermissionRole, UserType } from "@/types/UserTypes"
 import { ColumnDef } from "@tanstack/react-table"
@@ -50,28 +50,14 @@ const StaffActionsCell = ({ user }: { user: UserType }) => {
     const [open, setOpen] = useState(false)
     const [showRoles, setShowRoles] = useState(false)
     const [dropPos, setDropPos] = useState({ top: 0, right: 0 })
-    const [mounted, setMounted] = useState(false)
     const btnRef = useRef<HTMLButtonElement>(null)
-    const dropRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => { setMounted(true) }, [])
-
-    useEffect(() => {
-        if (!open) return
-        const onMouse = (e: MouseEvent) => {
-            const t = e.target as Node
-            if (!dropRef.current?.contains(t) && !btnRef.current?.contains(t)) {
-                setOpen(false); setShowRoles(false)
-            }
+    const handleBlur = (e: React.FocusEvent) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            setOpen(false)
+            setShowRoles(false)
         }
-        const onScroll = () => { setOpen(false); setShowRoles(false) }
-        document.addEventListener('mousedown', onMouse)
-        window.addEventListener('scroll', onScroll, true)
-        return () => {
-            document.removeEventListener('mousedown', onMouse)
-            window.removeEventListener('scroll', onScroll, true)
-        }
-    }, [open])
+    }
 
     const handleToggle = () => {
         if (!open && btnRef.current) {
@@ -99,11 +85,11 @@ const StaffActionsCell = ({ user }: { user: UserType }) => {
         </button>
     )
 
-    const dropdown = open ? (
+    const dropdownEl = open && (
         <div
-            ref={dropRef}
             style={{ position: 'fixed', top: dropPos.top, right: dropPos.right, zIndex: 9999 }}
             className="w-52 bg-[var(--tertiary)] border border-[var(--border)] rounded-xl shadow-xl p-1.5"
+            onMouseDown={(e) => e.preventDefault()}
         >
             {item(<UserCircle size={15} />, 'Открыть профиль', () => {})}
 
@@ -147,18 +133,20 @@ const StaffActionsCell = ({ user }: { user: UserType }) => {
             <div className="h-px bg-[var(--border)] my-1" />
             {item(<Ban size={15} />, 'Деактивировать', () => {}, true)}
         </div>
-    ) : null
+    )
 
     return (
         <>
-            <button
-                ref={btnRef}
-                onClick={handleToggle}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--accent-gray)] hover:bg-[var(--navbar)] hover:text-[var(--secondary)] transition-colors cursor-pointer"
-            >
-                <MoreHorizontal size={16} />
-            </button>
-            {mounted && dropdown && createPortal(dropdown, document.body)}
+            <div tabIndex={-1} className="outline-none" onBlur={handleBlur}>
+                <button
+                    ref={btnRef}
+                    onClick={handleToggle}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--accent-gray)] hover:bg-[var(--navbar)] hover:text-[var(--secondary)] transition-colors cursor-pointer"
+                >
+                    <MoreHorizontal size={16} />
+                </button>
+            </div>
+            {dropdownEl && createPortal(dropdownEl, document.body)}
         </>
     )
 }
