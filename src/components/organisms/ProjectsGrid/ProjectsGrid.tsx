@@ -370,101 +370,101 @@ const ProjectsGrid = () => {
           </div>
         </div>
 
-      <div className='flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none'>
-        {FILTERS.map((f) => {
-          const count = counts[f.value] ?? 0
-          const isActive = filter === f.value
-          return (
-            <button
-              key={f.value}
-              onClick={() => handleFilter(f.value)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                isActive
-                  ? 'bg-[var(--info)] text-white shadow-sm'
-                  : 'bg-[var(--tertiary)] text-[var(--accent-gray)] border border-[var(--border)] hover:border-[var(--info)]/50 hover:text-[var(--secondary)]'
-              }`}
-            >
-              {f.label}
-              <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  isActive
-                    ? 'bg-white/20 text-white'
-                    : 'bg-[var(--navbar)] text-[var(--accent-gray)]'
-                }`}
-              >
-                {count}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-
-      {paginated.length === 0 ? (
-        <div className='flex flex-col items-center justify-center py-20 text-center'>
-          <div className='w-14 h-14 rounded-full bg-[var(--navbar)] flex items-center justify-center mb-4'>
-            <Search size={22} className='text-[var(--accent-gray)]' />
-          </div>
-          <p className='text-base font-semibold text-[var(--secondary)]'>
-            Проекты не найдены
-          </p>
-          <p className='text-sm text-[var(--accent-gray)] mt-1'>
-            Попробуйте изменить фильтр или запрос
-          </p>
-        </div>
-      ) : (
-        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
-          {paginated.map((p) => (
-            <ProjectCard key={p.id} project={p} />
-          ))}
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <div className='flex items-center justify-between pt-2'>
-          <p className='text-xs text-[var(--accent-gray)]'>
-            Страница{' '}
-            <span className='font-semibold text-[var(--foreground)]'>
-              {safePage}
-            </span>{' '}
-            из{' '}
-            <span className='font-semibold text-[var(--foreground)]'>
-              {totalPages}
-            </span>
-          </p>
-          <div className='flex items-center gap-1'>
-            <button
-              onClick={() => handlePage(Math.max(1, safePage - 1))}
-              disabled={safePage === 1}
-              className='w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--navbar)] transition cursor-pointer'
-            >
-              <ChevronLeft size={15} />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+        <div className='flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none'>
+          {FILTERS.map((f) => {
+            const count = counts[f.value] ?? 0
+            const isActive = filter === f.value
+            return (
               <button
-                key={n}
-                onClick={() => handlePage(n)}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition cursor-pointer ${
-                  n === safePage
+                key={f.value}
+                onClick={() => handleFilter(f.value)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                  isActive
                     ? 'bg-[var(--info)] text-white shadow-sm'
-                    : 'border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] hover:bg-[var(--navbar)]'
+                    : 'bg-[var(--tertiary)] text-[var(--accent-gray)] border border-[var(--border)] hover:border-[var(--info)]/50 hover:text-[var(--secondary)]'
                 }`}
               >
-                {n}
+                {f.label}
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[var(--navbar)] text-[var(--accent-gray)]'
+                  }`}
+                >
+                  {count}
+                </span>
               </button>
-            ))}
-
-            <button
-              onClick={() => handlePage(Math.min(totalPages, safePage + 1))}
-              disabled={safePage === totalPages}
-              className='w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--navbar)] transition cursor-pointer'
-            >
-              <ChevronRight size={15} />
-            </button>
-          </div>
+            )
+          })}
         </div>
-      )}
-    </div>
+
+        {paginated.length === 0 ? (
+          <div className='flex flex-col items-center justify-center py-20 text-center'>
+            <div className='w-14 h-14 rounded-full bg-[var(--navbar)] flex items-center justify-center mb-4'>
+              <Search size={22} className='text-[var(--accent-gray)]' />
+            </div>
+            <p className='text-base font-semibold text-[var(--secondary)]'>
+              Проекты не найдены
+            </p>
+            <p className='text-sm text-[var(--accent-gray)] mt-1'>
+              Попробуйте изменить фильтр или запрос
+            </p>
+          </div>
+        ) : (
+          <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
+            {paginated.map((p) => (
+              <ProjectCard key={p.id} project={p} />
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className='flex items-center justify-between pt-2'>
+            <p className='text-xs text-[var(--accent-gray)]'>
+              Страница{' '}
+              <span className='font-semibold text-[var(--foreground)]'>
+                {safePage}
+              </span>{' '}
+              из{' '}
+              <span className='font-semibold text-[var(--foreground)]'>
+                {totalPages}
+              </span>
+            </p>
+            <div className='flex items-center gap-1'>
+              <button
+                onClick={() => handlePage(Math.max(1, safePage - 1))}
+                disabled={safePage === 1}
+                className='w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--navbar)] transition cursor-pointer'
+              >
+                <ChevronLeft size={15} />
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  onClick={() => handlePage(n)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition cursor-pointer ${
+                    n === safePage
+                      ? 'bg-[var(--info)] text-white shadow-sm'
+                      : 'border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] hover:bg-[var(--navbar)]'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePage(Math.min(totalPages, safePage + 1))}
+                disabled={safePage === totalPages}
+                className='w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--navbar)] transition cursor-pointer'
+              >
+                <ChevronRight size={15} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   )
 }
