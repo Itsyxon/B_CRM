@@ -23,25 +23,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const savedOwn = LocalStorage.get<OwnSettings>(OWN_SETTINGS_KEY)
         const savedCommon = LocalStorage.get<CommonSettings>(COMMON_SETTINGS_KEY)
-        if (savedOwn) {
-            setOwn({ ...defaultOwnSettings, ...savedOwn })
-        }
-        if (savedCommon) {
-            setCommon({ ...defaultCommonSettings, ...savedCommon })
-        }
+        if (savedOwn) setOwn({ ...defaultOwnSettings, ...savedOwn })
+        if (savedCommon) setCommon({ ...defaultCommonSettings, ...savedCommon })
     }, [])
-
-    useEffect(() => {
-        if (own.theme === 'dark') {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-    }, [own.theme])
 
     const updateOwn = (settings: OwnSettings) => {
         setOwn(settings)
         LocalStorage.set(OWN_SETTINGS_KEY, settings)
+        document.documentElement.classList.toggle('dark', settings.theme === 'dark')
     }
 
     const updateCommon = (settings: CommonSettings) => {

@@ -17,10 +17,18 @@ export default function RootLayout({
       <head>
         {/* Synchronously apply saved theme before hydration to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: `
-          try {
-            var s = JSON.parse(localStorage.getItem('SETTINGS_OWN') || '{}');
-            if (s.theme === 'dark') document.documentElement.classList.add('dark');
-          } catch(e) {}
+          (function() {
+            try {
+              document.documentElement.classList.add('no-transition');
+              var s = JSON.parse(localStorage.getItem('SETTINGS_OWN') || '{}');
+              if (s.theme === 'dark') document.documentElement.classList.add('dark');
+            } catch(e) {}
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() {
+                document.documentElement.classList.remove('no-transition');
+              });
+            });
+          })();
         `}} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" />

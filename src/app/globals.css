@@ -48,6 +48,10 @@
   color: var(--secondary)
 }
 
+.no-transition * {
+  transition: none !important;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

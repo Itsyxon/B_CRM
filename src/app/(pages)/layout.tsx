@@ -1,21 +1,22 @@
-import Header from '@/components/organisms/Header/Header';
-import NavBar from '@/components/organisms/NavBar/NavBar';
-import UserPanel from '@/components/organisms/UserPanel/UserPanel';
-import React from 'react';
+import Header from '@/components/organisms/Header/Header'
+import NavBar from '@/components/organisms/NavBar/NavBar'
+import UserPanel from '@/components/organisms/UserPanel/UserPanel'
+import NavContentArea from '@/components/atoms/NavContentArea'
+import { NavCollapseProvider } from '@/context/NavCollapseContext'
 
 const PagesLayout = ({ children }: { children: React.ReactNode }) => {
     return (
-        <div>
+        <NavCollapseProvider>
             <NavBar />
-            <div className='md:ml-[250px]'>
+            <NavContentArea>
                 <UserPanel />
-                <main className='p-4 md:p-8'>
+                <main className='p-4 md:p-8 overflow-x-hidden'>
                     <Header />
                     {children}
                 </main>
-            </div>
-        </div>
-    );
-};
+            </NavContentArea>
+        </NavCollapseProvider>
+    )
+}
 
-export default PagesLayout;
+export default PagesLayout
