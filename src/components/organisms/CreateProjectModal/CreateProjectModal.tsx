@@ -14,26 +14,41 @@ interface Props {
 const PRIORITIES: {
   value: ProjectPriority
   label: string
+  dot: string
   active: string
   idle: string
 }[] = [
   {
     value: 'low',
     label: 'Низкий',
-    active: 'bg-[var(--info)] text-white',
-    idle: 'text-slate-500 hover:bg-[var(--navbar)]',
+    dot: 'bg-slate-400',
+    active:
+      'border-slate-400 bg-slate-50 dark:bg-slate-400/10 text-slate-600 dark:text-slate-300',
+    idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-slate-300 hover:bg-[var(--navbar)]',
   },
   {
     value: 'medium',
     label: 'Средний',
-    active: 'bg-[var(--info)] text-white',
-    idle: 'text-amber-500 hover:bg-[var(--navbar)]',
+    dot: 'bg-amber-400',
+    active:
+      'border-amber-400 bg-amber-50 dark:bg-amber-400/10 text-amber-600 dark:text-amber-300',
+    idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-amber-300 hover:bg-[var(--navbar)]',
   },
   {
     value: 'high',
     label: 'Высокий',
-    active: 'bg-[var(--info)] text-white',
-    idle: 'text-rose-500 hover:bg-[var(--navbar)]',
+    dot: 'bg-rose-500',
+    active:
+      'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-300',
+    idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-rose-300 hover:bg-[var(--navbar)]',
+  },
+  {
+    value: 'critical',
+    label: 'Критический',
+    dot: 'bg-red-600',
+    active:
+      'border-red-600 bg-red-50 dark:bg-red-600/15 text-red-700 dark:text-red-400',
+    idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-red-400 hover:bg-[var(--navbar)]',
   },
 ]
 
@@ -41,6 +56,13 @@ const STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: 'active', label: 'Активный' },
   { value: 'paused', label: 'На паузе' },
 ]
+
+const PREDEFINED_TAGS = [
+  'API', 'Backend', 'Frontend', 'Mobile', 'Design',
+  'Database', 'Security', 'Testing', 'DevOps', 'Analytics',
+  'Marketing', 'Finance', 'HR', 'Интеграции', 'Документация',
+]
+const MAX_TAGS = 10
 
 const field =
   'w-full px-3 py-2.5 text-sm bg-[var(--background)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--info)] focus:ring-2 focus:ring-[var(--info)]/15 transition-all text-[var(--foreground)] placeholder:text-[var(--accent-gray)]'
@@ -230,6 +252,7 @@ const CreateProjectModal = ({ onClose }: Props) => {
   const [priority, setPriority] = useState<ProjectPriority>('medium')
   const [status, setStatus] = useState<ProjectStatus>('active')
   const [deadline, setDeadline] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [titleError, setTitleError] = useState(false)
   const [success, setSuccess] = useState(false)
 
@@ -259,7 +282,7 @@ const CreateProjectModal = ({ onClose }: Props) => {
           .toISOString()
           .split('T')[0],
       createdAt: new Date().toISOString().split('T')[0],
-      tags: [],
+      tags,
       budget: '—',
       teamSize: Math.max(1, assignees.length),
     }
@@ -367,25 +390,34 @@ const CreateProjectModal = ({ onClose }: Props) => {
                   />
                 </div>
 
-                <div className='grid grid-cols-2 gap-3'>
-                  <div>
-                    <p className={label}>Приоритет</p>
-                    <div className='flex rounded-lg border border-[var(--border)] overflow-hidden bg-[var(--background)]'>
-                      {PRIORITIES.map((p) => (
-                        <button
-                          key={p.value}
-                          type='button'
-                          onClick={() => setPriority(p.value)}
-                          className={`flex-1 py-2.5 text-xs font-medium transition-all cursor-pointer ${
-                            priority === p.value ? p.active : p.idle
-                          }`}
-                        >
-                          {p.label}
-                        </button>
-                      ))}
-                    </div>
+                <div>
+                  <p className={label}>Приоритет</p>
+                  <div className='grid grid-cols-2 gap-2'>
+                    {PRIORITIES.map((p) => (
+                      <button
+                        key={p.value}
+                        type='button'
+                        onClick={() => setPriority(p.value)}
+                        className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
+                          priority === p.value ? p.active : p.idle
+                        }`}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 ${p.dot}`}
+                        />
+                        {p.label}
+                        {priority === p.value && (
+                          <CheckCircle2
+                            size={12}
+                            className='ml-auto shrink-0 opacity-80'
+                          />
+                        )}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
+                <div className='grid grid-cols-2 gap-3'>
                   <div>
                     <p className={label}>Статус</p>
                     <select
@@ -402,17 +434,64 @@ const CreateProjectModal = ({ onClose }: Props) => {
                       ))}
                     </select>
                   </div>
+
+                  <div>
+                    <p className={label}>Дедлайн</p>
+                    <input
+                      type='date'
+                      value={deadline}
+                      onChange={(e) => setDeadline(e.target.value)}
+                      min={todayMin}
+                      className={`${field} cursor-pointer`}
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <p className={label}>Дедлайн</p>
-                  <input
-                    type='date'
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                    min={todayMin}
-                    className={`${field} cursor-pointer`}
-                  />
+                  <p className={label}>
+                    Теги
+                    <span className='normal-case font-normal text-[var(--accent-gray)] ml-1'>
+                      (макс. {MAX_TAGS})
+                    </span>
+                  </p>
+                  <div className='flex flex-wrap gap-1.5'>
+                    {PREDEFINED_TAGS.map((tag) => {
+                      const isSelected = tags.includes(tag)
+                      const disabled = !isSelected && tags.length >= MAX_TAGS
+                      return (
+                        <button
+                          key={tag}
+                          type='button'
+                          disabled={disabled}
+                          onClick={() =>
+                            setTags(
+                              isSelected
+                                ? tags.filter((t) => t !== tag)
+                                : [...tags, tag],
+                            )
+                          }
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all border ${
+                            isSelected
+                              ? 'bg-[var(--info)] border-[var(--info)] text-white cursor-pointer'
+                              : disabled
+                                ? 'opacity-35 cursor-not-allowed border-[var(--border)] text-[var(--accent-gray)]'
+                                : 'border-[var(--border)] text-[var(--accent-gray)] hover:border-[var(--info)]/50 hover:text-[var(--secondary)] hover:bg-[var(--navbar)] cursor-pointer'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {tags.length > 0 && (
+                    <p className='text-xs text-[var(--accent-gray)] mt-1.5'>
+                      Выбрано:{' '}
+                      <span className='font-semibold text-[var(--foreground)]'>
+                        {tags.length}
+                      </span>
+                      /{MAX_TAGS}
+                    </p>
+                  )}
                 </div>
               </div>
 

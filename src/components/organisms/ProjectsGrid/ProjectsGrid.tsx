@@ -2,19 +2,27 @@
 import { useProjects } from '@/app/api/projects/useProjects'
 import { Project, ProjectPriority, ProjectStatus } from '@/types/ProjectTypes'
 import {
+  Ban,
   CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
   DollarSign,
+  Pause,
+  Play,
   Plus,
   Search,
   Tag,
+  Trash2,
   TrendingUp,
   Users,
   X,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
 import Content from '@/components/atoms/Content'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
@@ -50,18 +58,29 @@ const statusMeta: Record<
   },
 }
 
-const priorityMeta: Record<ProjectPriority, { label: string; cls: string }> = {
-  high: {
-    label: 'Высокий',
-    cls: 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/10',
+const priorityMeta: Record<
+  ProjectPriority,
+  { label: string; cls: string; dot: string }
+> = {
+  low: {
+    label: 'Низкий',
+    cls: 'text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-500/10',
+    dot: 'bg-slate-400',
   },
   medium: {
     label: 'Средний',
     cls: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-500/10',
+    dot: 'bg-amber-400',
   },
-  low: {
-    label: 'Низкий',
-    cls: 'text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-500/10',
+  high: {
+    label: 'Высокий',
+    cls: 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/10',
+    dot: 'bg-rose-500',
+  },
+  critical: {
+    label: 'Критический',
+    cls: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-500/10',
+    dot: 'bg-red-600',
   },
 }
 
@@ -99,6 +118,7 @@ const formatDate = (s: string) =>
   })
 
 type Filter = 'all' | ProjectStatus
+type PriorityFilter = 'all' | ProjectPriority
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: 'Все' },
@@ -108,15 +128,91 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: 'cancelled', label: 'Отменены' },
 ]
 
+const PRIORITY_FILTERS: { value: PriorityFilter; label: string }[] = [
+  { value: 'all', label: 'Любой' },
+  { value: 'low', label: 'Низкий' },
+  { value: 'medium', label: 'Средний' },
+  { value: 'high', label: 'Высокий' },
+  { value: 'critical', label: 'Критический' },
+]
+
 const VALID_FILTERS = FILTERS.map((f) => f.value)
+const VALID_PRIORITY_FILTERS = PRIORITY_FILTERS.map((f) => f.value)
+
+const FilterDropdown = ({
+  label,
+  active,
+  children,
+}: {
+  label: React.ReactNode
+  active?: boolean
+  children: (close: () => void) => React.ReactNode
+}) => {
+  const [open, setOpen] = useState(false)
+  const close = () => setOpen(false)
+
+  return (
+    <div
+      className='relative outline-none'
+      tabIndex={-1}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false)
+      }}
+    >
+      <button
+        type='button'
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer whitespace-nowrap ${
+          active || open
+            ? 'border-[var(--info)] bg-[var(--info)]/10 text-[var(--info)]'
+            : 'border-[var(--border)] bg-[var(--tertiary)] text-[var(--accent-gray)] hover:text-[var(--secondary)] hover:border-[var(--info)]/40'
+        }`}
+      >
+        {label}
+        <ChevronDown
+          size={12}
+          className={`shrink-0 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && (
+        <div
+          onMouseDown={(e) => e.preventDefault()}
+          className='absolute top-full left-0 mt-1.5 z-50 min-w-[170px] max-h-64 overflow-y-auto bg-[var(--tertiary)] border border-[var(--border)] rounded-xl shadow-lg py-1 overflow-hidden'
+        >
+          {children(close)}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const ProjectDetailModal = ({
   project,
   onClose,
+  onUpdate,
 }: {
   project: Project
   onClose: () => void
+  onUpdate: (updated: Project) => void
 }) => {
+  const queryClient = useQueryClient()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const updateStatus = (status: ProjectStatus) => {
+    const updated = { ...project, status }
+    queryClient.setQueryData<Project[]>(['projects'], (old) =>
+      old ? old.map((p) => (p.id === project.id ? updated : p)) : old,
+    )
+    onUpdate(updated)
+  }
+
+  const deleteProject = () => {
+    queryClient.setQueryData<Project[]>(['projects'], (old) =>
+      old ? old.filter((p) => p.id !== project.id) : old,
+    )
+    onClose()
+  }
+
   const sm = statusMeta[project.status]
   const pm = priorityMeta[project.priority]
   const pc = progressColor(project.progress)
@@ -136,7 +232,9 @@ const ProjectDetailModal = ({
       className='fixed inset-0 z-[150] flex items-end sm:items-center justify-center sm:p-4'
       aria-modal='true'
       role='dialog'
-      onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose()
+      }}
     >
       <div
         className='absolute inset-0 bg-black/50 backdrop-blur-sm'
@@ -166,7 +264,7 @@ const ProjectDetailModal = ({
                   </span>
                 )}
               </div>
-              <h2 className='text-lg sm:text-xl font-bold text-[var(--secondary)] leading-tight'>
+              <h2 className='text-lg sm:text-xl font-bold text-[var(--secondary)] leading-tight truncate'>
                 {project.name}
               </h2>
             </div>
@@ -336,6 +434,77 @@ const ProjectDetailModal = ({
             </div>
           )}
         </div>
+
+        {/* Footer — actions */}
+        <div className='px-5 sm:px-6 py-4 border-t border-[var(--border)] shrink-0'>
+          {confirmDelete ? (
+            <div className='flex items-center justify-between gap-3'>
+              <p className='text-sm text-[var(--foreground)]'>
+                Удалить проект? Это действие необратимо.
+              </p>
+              <div className='flex items-center gap-2 shrink-0'>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className='px-3 py-1.5 rounded-lg text-sm font-medium border border-[var(--border)] bg-[var(--tertiary)] text-[var(--accent-gray)] hover:text-[var(--secondary)] transition-colors cursor-pointer'
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={deleteProject}
+                  className='px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors cursor-pointer'
+                >
+                  Удалить
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className='flex items-center gap-2 flex-wrap'>
+              {project.status !== 'completed' && (
+                <button
+                  onClick={() => updateStatus('completed')}
+                  className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors cursor-pointer'
+                >
+                  <CheckCircle2 size={14} />
+                  Завершить
+                </button>
+              )}
+              {project.status === 'active' && (
+                <button
+                  onClick={() => updateStatus('paused')}
+                  className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 dark:text-amber-400 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-colors cursor-pointer'
+                >
+                  <Pause size={14} />
+                  Приостановить
+                </button>
+              )}
+              {(project.status === 'paused' || project.status === 'cancelled') && (
+                <button
+                  onClick={() => updateStatus('active')}
+                  className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-colors cursor-pointer'
+                >
+                  <Play size={14} />
+                  Возобновить
+                </button>
+              )}
+              {project.status !== 'cancelled' && (
+                <button
+                  onClick={() => updateStatus('cancelled')}
+                  className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-colors cursor-pointer'
+                >
+                  <Ban size={14} />
+                  Отменить
+                </button>
+              )}
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className='ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--accent-gray)] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 border border-[var(--border)] hover:border-red-200 dark:hover:border-red-500/30 transition-colors cursor-pointer'
+              >
+                <Trash2 size={14} />
+                Удалить
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>,
     document.body,
@@ -388,7 +557,7 @@ const ProjectCard = ({
       </div>
 
       <div>
-        <h3 className='text-sm font-semibold text-[var(--secondary)] leading-snug mb-1 group-hover:text-[var(--info)] transition-colors'>
+        <h3 className='text-sm font-semibold truncate text-[var(--secondary)] leading-snug mb-1 group-hover:text-[var(--info)] transition-colors'>
           {project.name}
         </h3>
         <p className='text-xs text-[var(--accent-gray)] line-clamp-2 leading-relaxed'>
@@ -506,12 +675,30 @@ const ProjectsGrid = () => {
     const p = parseInt(searchParams.get('page') ?? '1')
     return Number.isFinite(p) && p >= 1 ? p : 1
   })
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>(() => {
+    const pf = searchParams.get('priority')
+    return pf && VALID_PRIORITY_FILTERS.includes(pf as PriorityFilter)
+      ? (pf as PriorityFilter)
+      : 'all'
+  })
+  const [tagFilter, setTagFilter] = useState<string[]>(() => {
+    const tf = searchParams.get('tags')
+    return tf ? tf.split(',').filter(Boolean) : []
+  })
 
-  const pushUrl = (f: Filter, q: string, p: number) => {
+  const pushUrl = (
+    f: Filter,
+    q: string,
+    p: number,
+    pf: PriorityFilter,
+    tf: string[],
+  ) => {
     const params = new URLSearchParams()
     if (f !== 'all') params.set('filter', f)
     if (q.trim()) params.set('q', q.trim())
     if (p > 1) params.set('page', String(p))
+    if (pf !== 'all') params.set('priority', pf)
+    if (tf.length > 0) params.set('tags', tf.join(','))
     const qs = params.toString()
     router.replace(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false })
   }
@@ -527,20 +714,31 @@ const ProjectsGrid = () => {
     }
   }, [projects])
 
+  const allTags = useMemo(() => {
+    if (!projects) return []
+    const set = new Set<string>()
+    projects.forEach((p) => p.tags.forEach((t) => set.add(t)))
+    return Array.from(set).sort()
+  }, [projects])
+
   const filtered = useMemo(() => {
     if (!projects) return []
     const q = search.toLowerCase().trim()
     return projects.filter((p) => {
       const matchStatus = filter === 'all' || p.status === filter
+      const matchPriority =
+        priorityFilter === 'all' || p.priority === priorityFilter
+      const matchTags =
+        tagFilter.length === 0 || tagFilter.some((t) => p.tags.includes(t))
       const matchSearch =
         !q ||
         p.name.toLowerCase().includes(q) ||
         p.description.toLowerCase().includes(q) ||
         p.author.toLowerCase().includes(q) ||
         p.tags.some((t) => t.toLowerCase().includes(q))
-      return matchStatus && matchSearch
+      return matchStatus && matchPriority && matchTags && matchSearch
     })
-  }, [projects, filter, search])
+  }, [projects, filter, priorityFilter, tagFilter, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
@@ -553,18 +751,33 @@ const ProjectsGrid = () => {
   const handleFilter = (f: Filter) => {
     setFilter(f)
     setPage(1)
-    pushUrl(f, search, 1)
+    pushUrl(f, search, 1, priorityFilter, tagFilter)
   }
 
   const handleSearch = (v: string) => {
     setSearch(v)
     setPage(1)
-    pushUrl(filter, v, 1)
+    pushUrl(filter, v, 1, priorityFilter, tagFilter)
   }
 
   const handlePage = (p: number) => {
     setPage(p)
-    pushUrl(filter, search, p)
+    pushUrl(filter, search, p, priorityFilter, tagFilter)
+  }
+
+  const handlePriorityFilter = (pf: PriorityFilter) => {
+    setPriorityFilter(pf)
+    setPage(1)
+    pushUrl(filter, search, 1, pf, tagFilter)
+  }
+
+  const handleTagFilter = (tag: string) => {
+    const next = tagFilter.includes(tag)
+      ? tagFilter.filter((t) => t !== tag)
+      : [...tagFilter, tag]
+    setTagFilter(next)
+    setPage(1)
+    pushUrl(filter, search, 1, priorityFilter, next)
   }
 
   if (isLoading) {
@@ -595,6 +808,7 @@ const ProjectsGrid = () => {
         <ProjectDetailModal
           project={selectedProject}
           onClose={() => setSelectedProject(null)}
+          onUpdate={(updated) => setSelectedProject(updated)}
         />
       )}
 
@@ -639,33 +853,169 @@ const ProjectsGrid = () => {
           </div>
         </div>
 
-        <div className='flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none'>
-          {FILTERS.map((f) => {
-            const count = counts[f.value] ?? 0
-            const isActive = filter === f.value
-            return (
-              <button
-                key={f.value}
-                onClick={() => handleFilter(f.value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                  isActive
-                    ? 'bg-[var(--info)] text-white shadow-sm'
-                    : 'bg-[var(--tertiary)] text-[var(--accent-gray)] border border-[var(--border)] hover:border-[var(--info)]/50 hover:text-[var(--secondary)]'
-                }`}
-              >
-                {f.label}
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                    isActive
-                      ? 'bg-white/20 text-white'
-                      : 'bg-[var(--navbar)] text-[var(--accent-gray)]'
-                  }`}
-                >
-                  {count}
+        <div className='flex items-center gap-2 flex-wrap'>
+          <FilterDropdown
+            active={filter !== 'all'}
+            label={
+              filter !== 'all' ? (
+                <span className='flex items-center gap-1.5'>
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 ${statusMeta[filter as ProjectStatus].dot}`}
+                  />
+                  {statusMeta[filter as ProjectStatus].label}
                 </span>
-              </button>
-            )
-          })}
+              ) : (
+                'Статус'
+              )
+            }
+          >
+            {(close) => (
+              <>
+                {FILTERS.map((f) => {
+                  const isActive = filter === f.value
+                  const count = counts[f.value] ?? 0
+                  return (
+                    <button
+                      key={f.value}
+                      type='button'
+                      onClick={() => {
+                        handleFilter(f.value)
+                        close()
+                      }}
+                      className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 text-sm transition-colors cursor-pointer ${
+                        isActive
+                          ? 'text-[var(--info)] font-medium bg-[var(--info)]/8'
+                          : 'text-[var(--foreground)] hover:bg-[var(--navbar)]'
+                      }`}
+                    >
+                      <span className='flex items-center gap-2'>
+                        {f.value !== 'all' && (
+                          <span
+                            className={`w-2 h-2 rounded-full ${statusMeta[f.value].dot}`}
+                          />
+                        )}
+                        {f.label}
+                      </span>
+                      <span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--navbar)] text-[var(--accent-gray)]'>
+                        {count}
+                      </span>
+                    </button>
+                  )
+                })}
+              </>
+            )}
+          </FilterDropdown>
+
+          <FilterDropdown
+            active={priorityFilter !== 'all'}
+            label={
+              priorityFilter !== 'all' ? (
+                <span className='flex items-center gap-1.5'>
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 ${priorityMeta[priorityFilter as ProjectPriority].dot}`}
+                  />
+                  {priorityMeta[priorityFilter as ProjectPriority].label}
+                </span>
+              ) : (
+                'Приоритет'
+              )
+            }
+          >
+            {(close) => (
+              <>
+                {PRIORITY_FILTERS.map((pf) => {
+                  const isActive = priorityFilter === pf.value
+                  return (
+                    <button
+                      key={pf.value}
+                      type='button'
+                      onClick={() => {
+                        handlePriorityFilter(pf.value)
+                        close()
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors cursor-pointer ${
+                        isActive
+                          ? 'text-[var(--info)] font-medium bg-[var(--info)]/8'
+                          : 'text-[var(--foreground)] hover:bg-[var(--navbar)]'
+                      }`}
+                    >
+                      {pf.value !== 'all' && (
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-[var(--info)]' : priorityMeta[pf.value].dot}`}
+                        />
+                      )}
+                      {pf.label}
+                    </button>
+                  )
+                })}
+              </>
+            )}
+          </FilterDropdown>
+
+          {allTags.length > 0 && (
+            <FilterDropdown
+              active={tagFilter.length > 0}
+              label={
+                tagFilter.length > 0 ? `Теги (${tagFilter.length})` : 'Теги'
+              }
+            >
+              {() => (
+                <>
+                  {allTags.map((tag) => {
+                    const isActive = tagFilter.includes(tag)
+                    return (
+                      <button
+                        key={tag}
+                        type='button'
+                        onClick={() => handleTagFilter(tag)}
+                        className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors cursor-pointer ${
+                          isActive
+                            ? 'text-[var(--info)] font-medium bg-[var(--info)]/8'
+                            : 'text-[var(--foreground)] hover:bg-[var(--navbar)]'
+                        }`}
+                      >
+                        <span
+                          className={`w-3.5 h-3.5 rounded border-[1.5px] flex items-center justify-center shrink-0 transition-colors ${
+                            isActive
+                              ? 'bg-[var(--info)] border-[var(--info)]'
+                              : 'border-[var(--accent-gray)]/50'
+                          }`}
+                        >
+                          {isActive && (
+                            <Check
+                              size={9}
+                              strokeWidth={3}
+                              className='text-white'
+                            />
+                          )}
+                        </span>
+                        {tag}
+                      </button>
+                    )
+                  })}
+                </>
+              )}
+            </FilterDropdown>
+          )}
+
+          {(filter !== 'all' ||
+            priorityFilter !== 'all' ||
+            tagFilter.length > 0) && (
+            <button
+              type='button'
+              onClick={() => {
+                setFilter('all')
+                setPriorityFilter('all')
+                setTagFilter([])
+                setPage(1)
+                pushUrl('all', search, 1, 'all', [])
+              }}
+              className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--accent-gray)] hover:text-rose-500 border border-[var(--border)] hover:border-rose-300 dark:hover:border-rose-500/40 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer whitespace-nowrap'
+            >
+              <X size={13} />
+              Сбросить
+            </button>
+          )}
         </div>
 
         {paginated.length === 0 ? (

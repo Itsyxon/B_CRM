@@ -5,7 +5,7 @@ interface LogoProps {
 const Logo = ({ className }: LogoProps) => {
   return (
     <h1
-      className={`text-[var(--info)] text-xl font-bold whitespace-nowrap ${className || ''}`}
+      className={`text-[var(--info)] text-2xl font-family-accent font-bold whitespace-nowrap ${className || ''}`}
     >
       B-CRM
     </h1>

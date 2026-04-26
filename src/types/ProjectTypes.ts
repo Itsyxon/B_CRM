@@ -1,5 +1,5 @@
 export type ProjectStatus = 'active' | 'completed' | 'paused' | 'cancelled'
-export type ProjectPriority = 'low' | 'medium' | 'high'
+export type ProjectPriority = 'low' | 'medium' | 'high' | 'critical'
 
 export interface Project {
   id: number
