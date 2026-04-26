@@ -1,6 +1,5 @@
 'use client'
 
-// ── Sparkline ─────────────────────────────────────────────────────────────────
 const Sparkline = ({ data, strokeClass }: { data: number[]; strokeClass: string }) => {
     const W = 72, H = 30
     const max = Math.max(...data)
@@ -13,7 +12,6 @@ const Sparkline = ({ data, strokeClass }: { data: number[]; strokeClass: string 
             return `${x.toFixed(1)},${y.toFixed(1)}`
         })
         .join(' ')
-
     return (
         <svg width={W} height={H} className="overflow-visible shrink-0">
             <polyline
@@ -28,7 +26,6 @@ const Sparkline = ({ data, strokeClass }: { data: number[]; strokeClass: string 
     )
 }
 
-// ── Ring ──────────────────────────────────────────────────────────────────────
 const Ring = ({ pct, strokeClass }: { pct: number; strokeClass: string }) => {
     const r = 18, cx = 22, cy = 22
     const circ = 2 * Math.PI * r
@@ -47,66 +44,123 @@ const Ring = ({ pct, strokeClass }: { pct: number; strokeClass: string }) => {
     )
 }
 
-// ── Cards ─────────────────────────────────────────────────────────────────────
-
-const DashboardMetrics = () => {
-    return (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-            {/* Card 1 – Conversion (progress bar) */}
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-4 flex flex-col gap-2">
-                <p className="text-xs text-[var(--accent-gray)]">Конверсия сделок</p>
-                <p className="text-2xl font-bold text-[var(--foreground)]">68.4%</p>
-                <div className="h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '68.4%' }} />
-                </div>
-                <p className="text-xs text-emerald-500 font-medium">↑ +4.1% к прошлому мес.</p>
-            </div>
-
-            {/* Card 2 – New clients (sparkline) */}
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-4 flex flex-col gap-2">
-                <p className="text-xs text-[var(--accent-gray)]">Новые клиенты</p>
-                <div className="flex items-end justify-between gap-2">
-                    <div>
-                        <p className="text-2xl font-bold text-[var(--foreground)]">124</p>
-                        <p className="text-xs text-[var(--accent-gray)] mt-0.5">за месяц</p>
-                    </div>
-                    <Sparkline
-                        data={[40, 55, 35, 70, 60, 80, 65, 90]}
-                        strokeClass="stroke-blue-500"
-                    />
-                </div>
-                <p className="text-xs text-blue-500 font-medium">↑ +12 к прошлому мес.</p>
-            </div>
-
-            {/* Card 3 – Avg deal time (ring) */}
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-4 flex flex-col gap-2">
-                <p className="text-xs text-[var(--accent-gray)]">Ср. время сделки</p>
-                <div className="flex items-center gap-3">
-                    <Ring pct={42} strokeClass="stroke-amber-500" />
-                    <div>
-                        <p className="text-2xl font-bold text-[var(--foreground)] leading-none">4.2</p>
-                        <p className="text-xs text-[var(--accent-gray)] mt-1">дня</p>
-                    </div>
-                </div>
-                <p className="text-xs text-amber-500 font-medium">↓ −0.8 дн от нормы</p>
-            </div>
-
-            {/* Card 4 – Tasks done (fraction + bar) */}
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-4 flex flex-col gap-2">
-                <p className="text-xs text-[var(--accent-gray)]">Задачи выполнены</p>
-                <p className="text-2xl font-bold text-[var(--foreground)]">
-                    89{' '}
-                    <span className="text-base font-medium text-[var(--accent-gray)]">/ 100</span>
-                </p>
-                <div className="h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden">
-                    <div className="h-full bg-violet-500 rounded-full" style={{ width: '89%' }} />
-                </div>
-                <p className="text-xs text-[var(--accent-gray)]">Текущий спринт</p>
-            </div>
-
-        </div>
-    )
+interface Props {
+    compact?: boolean
 }
+
+const card = 'rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-4 flex flex-col gap-2'
+
+const val = 'text-xl xl:text-2xl font-bold text-[var(--foreground)]'
+
+const DashboardMetrics = ({ compact }: Props) => (
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+
+        {/* 1 – Конверсия */}
+        <div className={card}>
+            <p className="text-xs text-[var(--accent-gray)]">Конверсия сделок</p>
+            <p className={val}>68.4%</p>
+            <div className="h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: '68.4%' }} />
+            </div>
+            <p className="text-xs text-emerald-500 font-medium">+4.1% к прошлому мес.</p>
+        </div>
+
+        {/* 2 – Новые клиенты */}
+        <div className={card}>
+            <p className="text-xs text-[var(--accent-gray)]">Новые клиенты</p>
+            <div className="flex items-end justify-between gap-2">
+                <div>
+                    <p className={val}>124</p>
+                    <p className="text-xs text-[var(--accent-gray)] mt-0.5">за месяц</p>
+                </div>
+                <Sparkline data={[40, 55, 35, 70, 60, 80, 65, 90]} strokeClass="stroke-blue-500" />
+            </div>
+            <p className="text-xs text-blue-500 font-medium">+12 к прошлому мес.</p>
+        </div>
+
+        {/* 3 – Ср. время сделки */}
+        <div className={card}>
+            <p className="text-xs text-[var(--accent-gray)]">Ср. время сделки</p>
+            <div className="flex items-center gap-3">
+                <Ring pct={42} strokeClass="stroke-amber-500" />
+                <div>
+                    <p className={`${val} leading-none`}>4.2</p>
+                    <p className="text-xs text-[var(--accent-gray)] mt-1">дня</p>
+                </div>
+            </div>
+            <p className="text-xs text-amber-500 font-medium">−0.8 дн. от нормы</p>
+        </div>
+
+        {/* 4 – Задачи */}
+        <div className={card}>
+            <p className="text-xs text-[var(--accent-gray)]">Задачи выполнены</p>
+            <p className={val}>
+                89{' '}
+                <span className="text-sm xl:text-base font-medium text-[var(--accent-gray)]">/ 100</span>
+            </p>
+            <div className="h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden">
+                <div className="h-full bg-violet-500 rounded-full" style={{ width: '89%' }} />
+            </div>
+            <p className="text-xs text-[var(--accent-gray)]">Текущий спринт</p>
+        </div>
+
+        {/* Расширенные метрики */}
+        {!compact && (
+            <>
+                {/* 5 – MRR */}
+                <div className={card}>
+                    <p className="text-xs text-[var(--accent-gray)]">MRR</p>
+                    <div className="flex items-end justify-between gap-2">
+                        <div>
+                            <p className={val}>2.4M</p>
+                            <p className="text-xs text-[var(--accent-gray)] mt-0.5">₽ / мес.</p>
+                        </div>
+                        <Sparkline data={[180, 210, 195, 230, 215, 245, 260, 240]} strokeClass="stroke-violet-500" />
+                    </div>
+                    <p className="text-xs text-violet-500 font-medium">+8.3% к прошлому мес.</p>
+                </div>
+
+                {/* 6 – NPS */}
+                <div className={card}>
+                    <p className="text-xs text-[var(--accent-gray)]">NPS</p>
+                    <div className="flex items-center gap-3">
+                        <Ring pct={72} strokeClass="stroke-emerald-500" />
+                        <div>
+                            <p className={`${val} leading-none`}>72</p>
+                            <p className="text-xs text-[var(--accent-gray)] mt-1">из 100</p>
+                        </div>
+                    </div>
+                    <p className="text-xs text-emerald-500 font-medium">+5 пт. к прошлому мес.</p>
+                </div>
+
+                {/* 7 – Средний чек: число + ₽ на одной строке, без side-by-side sparkline */}
+                <div className={card}>
+                    <p className="text-xs text-[var(--accent-gray)]">Средний чек</p>
+                    <div className="flex items-baseline gap-1 min-w-0">
+                        <p className={`${val} truncate`}>48 500</p>
+                        <span className="text-sm xl:text-base font-semibold text-[var(--accent-gray)] shrink-0">₽</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500 rounded-full" style={{ width: '62%' }} />
+                    </div>
+                    <p className="text-xs text-amber-500 font-medium">+2 100 ₽ к прошлому мес.</p>
+                </div>
+
+                {/* 8 – Отток */}
+                <div className={card}>
+                    <p className="text-xs text-[var(--accent-gray)]">Отток клиентов</p>
+                    <div className="flex items-end justify-between gap-2">
+                        <div>
+                            <p className={val}>3.2%</p>
+                            <p className="text-xs text-[var(--accent-gray)] mt-0.5">за месяц</p>
+                        </div>
+                        <Sparkline data={[4.8, 4.2, 3.9, 4.1, 3.7, 3.5, 3.4, 3.2]} strokeClass="stroke-rose-500" />
+                    </div>
+                    <p className="text-xs text-emerald-500 font-medium">−0.4% к прошлому мес.</p>
+                </div>
+            </>
+        )}
+    </div>
+)
 
 export default DashboardMetrics

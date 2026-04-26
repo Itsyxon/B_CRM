@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  Plus,
   Search,
   Users,
   X,
@@ -12,6 +13,7 @@ import {
 import { useMemo, useState } from 'react'
 import Content from '@/components/atoms/Content'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import CreateProjectModal from '@/components/organisms/CreateProjectModal/CreateProjectModal'
 
 const PAGE_SIZE = 6
 
@@ -230,6 +232,8 @@ const ProjectsGrid = () => {
 
   const { data: projects, isLoading, isError } = useProjects()
 
+  const [modalOpen, setModalOpen] = useState(false)
+
   const [filter, setFilter] = useState<Filter>(() => {
     const f = searchParams.get('filter')
     return f && VALID_FILTERS.includes(f as Filter) ? (f as Filter) : 'all'
@@ -322,36 +326,49 @@ const ProjectsGrid = () => {
   }
 
   return (
-    <div className='space-y-5'>
-      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
-        <div className='relative w-full sm:max-w-xs'>
-          <Search
-            size={14}
-            className='absolute left-3 top-1/2 -translate-y-1/2 text-[var(--accent-gray)] pointer-events-none'
-          />
-          <input
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder='Поиск по проектам...'
-            className='w-full pl-9 pr-8 py-2 text-sm bg-[var(--tertiary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--info)] focus:ring-2 focus:ring-[var(--info)]/15 text-[var(--foreground)] placeholder:text-[var(--accent-gray)] transition-all'
-          />
-          {search && (
+    <>
+      {modalOpen && <CreateProjectModal onClose={() => setModalOpen(false)} />}
+
+      <div className='space-y-5'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
+          <div className='relative w-full sm:max-w-xs'>
+            <Search
+              size={14}
+              className='absolute left-3 top-1/2 -translate-y-1/2 text-[var(--accent-gray)] pointer-events-none'
+            />
+            <input
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder='Поиск по проектам...'
+              className='w-full pl-9 pr-8 py-2 text-sm bg-[var(--tertiary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--info)] focus:ring-2 focus:ring-[var(--info)]/15 text-[var(--foreground)] placeholder:text-[var(--accent-gray)] transition-all'
+            />
+            {search && (
+              <button
+                onClick={() => handleSearch('')}
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--accent-gray)] hover:text-[var(--foreground)] transition cursor-pointer'
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+
+          <div className='flex items-center gap-3 shrink-0'>
+            <p className='text-sm text-[var(--accent-gray)]'>
+              Найдено{' '}
+              <span className='font-semibold text-[var(--foreground)]'>
+                {filtered.length}
+              </span>{' '}
+              проектов
+            </p>
             <button
-              onClick={() => handleSearch('')}
-              className='absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--accent-gray)] hover:text-[var(--foreground)] transition cursor-pointer'
+              onClick={() => setModalOpen(true)}
+              className='flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white bg-[var(--info)] rounded-lg hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0'
             >
-              <X size={13} />
+              <Plus size={15} />
+              Создать проект
             </button>
-          )}
+          </div>
         </div>
-        <p className='text-sm text-[var(--accent-gray)] shrink-0'>
-          Найдено{' '}
-          <span className='font-semibold text-[var(--foreground)]'>
-            {filtered.length}
-          </span>{' '}
-          проектов
-        </p>
-      </div>
 
       <div className='flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none'>
         {FILTERS.map((f) => {
@@ -448,6 +465,7 @@ const ProjectsGrid = () => {
         </div>
       )}
     </div>
+    </>
   )
 }
 
