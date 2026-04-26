@@ -522,6 +522,7 @@ const ProjectCard = ({
   const sm = statusMeta[project.status]
   const pm = priorityMeta[project.priority]
   const pc = progressColor(project.progress)
+  const isCritical = project.priority === 'critical'
   const isOverdue =
     project.status !== 'completed' &&
     project.status !== 'cancelled' &&
@@ -536,8 +537,15 @@ const ProjectCard = ({
   return (
     <div
       onClick={onClick}
-      className='rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-5 flex flex-col gap-4 hover:border-[var(--info)]/40 hover:shadow-md transition-all cursor-pointer group'
+      className={`relative rounded-xl border p-5 flex flex-col gap-4 transition-all cursor-pointer group overflow-hidden ${
+        isCritical
+          ? 'border-red-300 dark:border-red-700/60 bg-[var(--tertiary)] hover:border-red-400 dark:hover:border-red-600 hover:shadow-[0_4px_24px_-4px_rgba(220,38,38,0.25)]'
+          : 'border-[var(--border)] bg-[var(--tertiary)] hover:border-[var(--info)]/40 hover:shadow-md'
+      }`}
     >
+      {isCritical && (
+        <span className='absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 via-red-400 to-rose-500' />
+      )}
       <div className='flex items-start justify-between gap-2'>
         <div className='flex flex-wrap gap-1.5'>
           {project.tags.map((tag) => (
@@ -723,21 +731,24 @@ const ProjectsGrid = () => {
 
   const filtered = useMemo(() => {
     if (!projects) return []
+    const priorityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
     const q = search.toLowerCase().trim()
-    return projects.filter((p) => {
-      const matchStatus = filter === 'all' || p.status === filter
-      const matchPriority =
-        priorityFilter === 'all' || p.priority === priorityFilter
-      const matchTags =
-        tagFilter.length === 0 || tagFilter.some((t) => p.tags.includes(t))
-      const matchSearch =
-        !q ||
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.author.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q))
-      return matchStatus && matchPriority && matchTags && matchSearch
-    })
+    return projects
+      .filter((p) => {
+        const matchStatus = filter === 'all' || p.status === filter
+        const matchPriority =
+          priorityFilter === 'all' || p.priority === priorityFilter
+        const matchTags =
+          tagFilter.length === 0 || tagFilter.some((t) => p.tags.includes(t))
+        const matchSearch =
+          !q ||
+          p.name.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.author.toLowerCase().includes(q) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+        return matchStatus && matchPriority && matchTags && matchSearch
+      })
+      .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
   }, [projects, filter, priorityFilter, tagFilter, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
