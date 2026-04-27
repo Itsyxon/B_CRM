@@ -6,67 +6,51 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useStaff } from '@/app/api/staff/useStaff'
 import { Project, ProjectPriority, ProjectStatus } from '@/types/ProjectTypes'
 import { UserType } from '@/types/UserTypes'
+import { useSettings } from '@/context/SettingsContext'
+import { projectsDictionary } from '@/lib/dictionaries'
 
 interface Props {
   onClose: () => void
 }
 
-const PRIORITIES: {
-  value: ProjectPriority
-  label: string
-  dot: string
-  active: string
-  idle: string
-}[] = [
-  {
-    value: 'low',
-    label: 'Низкий',
+const PRIORITY_STYLES: Record<
+  ProjectPriority,
+  { dot: string; active: string; idle: string }
+> = {
+  low: {
     dot: 'bg-slate-400',
-    active:
-      'border-slate-400 bg-slate-50 dark:bg-slate-400/10 text-slate-600 dark:text-slate-300',
+    active: 'border-slate-400 bg-slate-50 dark:bg-slate-400/10 text-slate-600 dark:text-slate-300',
     idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-slate-300 hover:bg-[var(--navbar)]',
   },
-  {
-    value: 'medium',
-    label: 'Средний',
+  medium: {
     dot: 'bg-amber-400',
-    active:
-      'border-amber-400 bg-amber-50 dark:bg-amber-400/10 text-amber-600 dark:text-amber-300',
+    active: 'border-amber-400 bg-amber-50 dark:bg-amber-400/10 text-amber-600 dark:text-amber-300',
     idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-amber-300 hover:bg-[var(--navbar)]',
   },
-  {
-    value: 'high',
-    label: 'Высокий',
+  high: {
     dot: 'bg-rose-500',
-    active:
-      'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-300',
+    active: 'border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-300',
     idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-rose-300 hover:bg-[var(--navbar)]',
   },
-  {
-    value: 'critical',
-    label: 'Критический',
+  critical: {
     dot: 'bg-red-600',
-    active:
-      'border-red-600 bg-red-50 dark:bg-red-600/15 text-red-700 dark:text-red-400',
+    active: 'border-red-600 bg-red-50 dark:bg-red-600/15 text-red-700 dark:text-red-400',
     idle: 'border-[var(--border)] text-[var(--accent-gray)] hover:border-red-400 hover:bg-[var(--navbar)]',
   },
-]
+}
 
-const STATUSES: { value: ProjectStatus; label: string }[] = [
-  { value: 'active', label: 'Активный' },
-  { value: 'paused', label: 'На паузе' },
-]
+const STATUS_VALUES: ('active' | 'paused')[] = ['active', 'paused']
 
 const PREDEFINED_TAGS = [
   'API', 'Backend', 'Frontend', 'Mobile', 'Design',
   'Database', 'Security', 'Testing', 'DevOps', 'Analytics',
-  'Marketing', 'Finance', 'HR', 'Интеграции', 'Документация',
+  'Marketing', 'Finance', 'HR', 'Integrations', 'Documentation',
 ]
 const MAX_TAGS = 10
 
-const field =
+const fieldCls =
   'w-full px-3 py-2.5 text-sm bg-[var(--background)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--info)] focus:ring-2 focus:ring-[var(--info)]/15 transition-all text-[var(--foreground)] placeholder:text-[var(--accent-gray)]'
-const label =
+const labelCls =
   'block text-xs font-semibold text-[var(--accent-gray)] uppercase tracking-wide mb-1.5'
 
 function initials(name: string) {
@@ -82,12 +66,18 @@ interface MultiComboboxProps {
   staff: UserType[]
   value: UserType[]
   onChange: (v: UserType[]) => void
+  searchPlaceholder: string
+  allAddedText: string
+  notFoundText: string
 }
 
 const MultiAssigneeSelector = ({
   staff,
   value,
   onChange,
+  searchPlaceholder,
+  allAddedText,
+  notFoundText,
 }: MultiComboboxProps) => {
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
@@ -129,9 +119,6 @@ const MultiAssigneeSelector = ({
     if (open) setTimeout(updateRect, 0)
   }
 
-  // Close when focus leaves this component entirely.
-  // React's onBlur bubbles (uses native focusout), so it fires for any child blur.
-  // onMouseDown preventDefault on the portal prevents blur on genuine picks.
   const handleBlur = (e: React.FocusEvent) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setOpen(false)
@@ -146,7 +133,7 @@ const MultiAssigneeSelector = ({
       onBlur={handleBlur}
     >
       <div
-        className={`${field} flex flex-wrap items-center gap-1.5 cursor-text min-h-[40px] py-2 ${open ? 'border-[var(--info)] ring-2 ring-[var(--info)]/15' : ''}`}
+        className={`${fieldCls} flex flex-wrap items-center gap-1.5 cursor-text min-h-[40px] py-2 ${open ? 'border-[var(--info)] ring-2 ring-[var(--info)]/15' : ''}`}
         onClick={() => {
           openDrop()
           inputRef.current?.focus()
@@ -184,14 +171,11 @@ const MultiAssigneeSelector = ({
               setOpen(false)
             }
           }}
-          placeholder={value.length === 0 ? 'Поиск по имени или роли' : ''}
+          placeholder={value.length === 0 ? searchPlaceholder : ''}
           className='flex-1 min-w-[80px] bg-transparent outline-none text-sm text-[var(--foreground)] placeholder:text-[var(--accent-gray)]'
         />
         {value.length === 0 && (
-          <Search
-            size={13}
-            className='shrink-0 text-[var(--accent-gray)] pointer-events-none'
-          />
+          <Search size={13} className='shrink-0 text-[var(--accent-gray)] pointer-events-none' />
         )}
       </div>
 
@@ -205,9 +189,7 @@ const MultiAssigneeSelector = ({
           >
             {filtered.length === 0 ? (
               <p className='px-3 py-3 text-sm text-[var(--accent-gray)] text-center'>
-                {available.length === 0
-                  ? 'Все сотрудники добавлены'
-                  : 'Не найдено'}
+                {available.length === 0 ? allAddedText : notFoundText}
               </p>
             ) : (
               <ul className='max-h-[200px] overflow-y-auto'>
@@ -244,6 +226,9 @@ const MultiAssigneeSelector = ({
 }
 
 const CreateProjectModal = ({ onClose }: Props) => {
+  const { own } = useSettings()
+  const d = projectsDictionary[own.language].create
+
   const { data: staff = [] } = useStaff()
 
   const [title, setTitle] = useState('')
@@ -258,6 +243,18 @@ const CreateProjectModal = ({ onClose }: Props) => {
 
   const titleRef = useRef<HTMLInputElement>(null)
   const qc = useQueryClient()
+
+  const PRIORITIES: { value: ProjectPriority; label: string; dot: string; active: string; idle: string }[] = [
+    { value: 'low',      label: d.priorityLabels.low,      ...PRIORITY_STYLES.low },
+    { value: 'medium',   label: d.priorityLabels.medium,   ...PRIORITY_STYLES.medium },
+    { value: 'high',     label: d.priorityLabels.high,     ...PRIORITY_STYLES.high },
+    { value: 'critical', label: d.priorityLabels.critical, ...PRIORITY_STYLES.critical },
+  ]
+
+  const STATUSES: { value: ProjectStatus; label: string }[] = STATUS_VALUES.map((v) => ({
+    value: v,
+    label: d.statusLabels[v],
+  }))
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -314,10 +311,10 @@ const CreateProjectModal = ({ onClose }: Props) => {
               <CheckCircle2 size={30} className='text-emerald-500' />
             </div>
             <p className='text-base font-semibold text-[var(--secondary)]'>
-              Проект создан!
+              {d.successTitle}
             </p>
             <p className='text-sm text-[var(--accent-gray)]'>
-              «{title}» добавлен в список проектов
+              {d.successMessage(title)}
             </p>
           </div>
         ) : (
@@ -329,10 +326,10 @@ const CreateProjectModal = ({ onClose }: Props) => {
                 </div>
                 <div>
                   <h2 className='text-base font-semibold text-[var(--secondary)]'>
-                    Новый проект
+                    {d.title}
                   </h2>
                   <p className='text-xs text-[var(--accent-gray)]'>
-                    Заполните основные данные
+                    {d.subtitle}
                   </p>
                 </div>
               </div>
@@ -347,11 +344,9 @@ const CreateProjectModal = ({ onClose }: Props) => {
             <form onSubmit={handleSubmit} noValidate>
               <div className='px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto'>
                 <div>
-                  <p className={label}>
-                    Название{' '}
-                    <span className='text-rose-500 normal-case font-normal'>
-                      *
-                    </span>
+                  <p className={labelCls}>
+                    {d.titleLabel}{' '}
+                    <span className='text-rose-500 normal-case font-normal'>*</span>
                   </p>
                   <input
                     ref={titleRef}
@@ -360,38 +355,39 @@ const CreateProjectModal = ({ onClose }: Props) => {
                       setTitle(e.target.value)
                       setTitleError(false)
                     }}
-                    placeholder='Например: Редизайн главной страницы'
-                    className={`${field} ${titleError ? 'border-rose-400 focus:ring-rose-400/15' : ''}`}
+                    placeholder={d.titlePlaceholder}
+                    className={`${fieldCls} ${titleError ? 'border-rose-400 focus:ring-rose-400/15' : ''}`}
                   />
                   {titleError && (
-                    <p className='text-xs text-rose-500 mt-1'>
-                      Введите название проекта
-                    </p>
+                    <p className='text-xs text-rose-500 mt-1'>{d.titleError}</p>
                   )}
                 </div>
 
                 <div>
-                  <p className={label}>Описание</p>
+                  <p className={labelCls}>{d.descriptionLabel}</p>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder='Краткое описание целей, задач и ожидаемого результата'
+                    placeholder={d.descriptionPlaceholder}
                     rows={3}
-                    className={`${field} resize-none`}
+                    className={`${fieldCls} resize-none`}
                   />
                 </div>
 
                 <div>
-                  <p className={label}>Ответственные</p>
+                  <p className={labelCls}>{d.assigneesLabel}</p>
                   <MultiAssigneeSelector
                     staff={staff}
                     value={assignees}
                     onChange={setAssignees}
+                    searchPlaceholder={d.assigneesSearch}
+                    allAddedText={d.allAdded}
+                    notFoundText={d.notFound}
                   />
                 </div>
 
                 <div>
-                  <p className={label}>Приоритет</p>
+                  <p className={labelCls}>{d.priorityLabel}</p>
                   <div className='grid grid-cols-2 gap-2'>
                     {PRIORITIES.map((p) => (
                       <button
@@ -402,15 +398,10 @@ const CreateProjectModal = ({ onClose }: Props) => {
                           priority === p.value ? p.active : p.idle
                         }`}
                       >
-                        <span
-                          className={`w-2 h-2 rounded-full shrink-0 ${p.dot}`}
-                        />
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${p.dot}`} />
                         {p.label}
                         {priority === p.value && (
-                          <CheckCircle2
-                            size={12}
-                            className='ml-auto shrink-0 opacity-80'
-                          />
+                          <CheckCircle2 size={12} className='ml-auto shrink-0 opacity-80' />
                         )}
                       </button>
                     ))}
@@ -419,13 +410,11 @@ const CreateProjectModal = ({ onClose }: Props) => {
 
                 <div className='grid grid-cols-2 gap-3'>
                   <div>
-                    <p className={label}>Статус</p>
+                    <p className={labelCls}>{d.statusLabel}</p>
                     <select
                       value={status}
-                      onChange={(e) =>
-                        setStatus(e.target.value as ProjectStatus)
-                      }
-                      className={`${field} cursor-pointer`}
+                      onChange={(e) => setStatus(e.target.value as ProjectStatus)}
+                      className={`${fieldCls} cursor-pointer`}
                     >
                       {STATUSES.map((s) => (
                         <option key={s.value} value={s.value}>
@@ -436,23 +425,20 @@ const CreateProjectModal = ({ onClose }: Props) => {
                   </div>
 
                   <div>
-                    <p className={label}>Дедлайн</p>
+                    <p className={labelCls}>{d.deadlineLabel}</p>
                     <input
                       type='date'
                       value={deadline}
                       onChange={(e) => setDeadline(e.target.value)}
                       min={todayMin}
-                      className={`${field} cursor-pointer`}
+                      className={`${fieldCls} cursor-pointer`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <p className={label}>
-                    Теги
-                    <span className='normal-case font-normal text-[var(--accent-gray)] ml-1'>
-                      (макс. {MAX_TAGS})
-                    </span>
+                  <p className={labelCls}>
+                    {d.tagsLabel(MAX_TAGS)}
                   </p>
                   <div className='flex flex-wrap gap-1.5'>
                     {PREDEFINED_TAGS.map((tag) => {
@@ -485,11 +471,7 @@ const CreateProjectModal = ({ onClose }: Props) => {
                   </div>
                   {tags.length > 0 && (
                     <p className='text-xs text-[var(--accent-gray)] mt-1.5'>
-                      Выбрано:{' '}
-                      <span className='font-semibold text-[var(--foreground)]'>
-                        {tags.length}
-                      </span>
-                      /{MAX_TAGS}
+                      {d.selectedTags(tags.length, MAX_TAGS)}
                     </p>
                   )}
                 </div>
@@ -501,13 +483,13 @@ const CreateProjectModal = ({ onClose }: Props) => {
                   onClick={onClose}
                   className='px-4 py-2 text-sm font-medium text-[var(--accent-gray)] hover:text-[var(--secondary)] bg-[var(--tertiary)] border border-[var(--border)] rounded-lg hover:bg-[var(--background)] transition-all cursor-pointer'
                 >
-                  Отмена
+                  {d.cancelButton}
                 </button>
                 <button
                   type='submit'
                   className='px-5 py-2 text-sm font-medium text-white bg-[var(--info)] rounded-lg hover:opacity-90 active:scale-95 transition-all cursor-pointer'
                 >
-                  Создать проект
+                  {d.createButton}
                 </button>
               </div>
             </form>

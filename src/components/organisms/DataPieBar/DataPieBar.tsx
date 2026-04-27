@@ -1,13 +1,13 @@
-import React from 'react';
+import React from 'react'
 import {
     Chart as ChartJS,
     Tooltip,
     Legend,
     ArcElement
-} from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
+} from 'chart.js'
+import { Doughnut } from 'react-chartjs-2'
 
-ChartJS.register(ArcElement, Legend, Tooltip);
+ChartJS.register(ArcElement, Legend, Tooltip)
 
 ChartJS.defaults.plugins.tooltip.backgroundColor = '#fff'
 ChartJS.defaults.plugins.tooltip.bodyColor = '#000'
@@ -27,11 +27,11 @@ const COLORS = [
     'rgba(94, 234, 212, 0.8)',
 ]
 
-const DataPieBar = ({ clientsData }: { clientsData: number[] }) => {
+const DataPieBar = ({ clientsData, datasetLabel }: { clientsData: number[]; datasetLabel: string }) => {
     const data = {
         datasets: [
             {
-                label: 'Клиенты',
+                label: datasetLabel,
                 data: clientsData,
                 backgroundColor: COLORS.slice(0, clientsData.length),
                 borderColor: 'transparent',
@@ -39,7 +39,7 @@ const DataPieBar = ({ clientsData }: { clientsData: number[] }) => {
                 hoverOffset: 6,
             }
         ],
-    };
+    }
 
     return (
         <div className='w-full max-w-[220px] mx-auto h-[190px] sm:h-[220px]'>
@@ -62,7 +62,7 @@ const DataPieBar = ({ clientsData }: { clientsData: number[] }) => {
                 }}
             />
         </div>
-    );
-};
+    )
+}
 
-export default DataPieBar;
+export default DataPieBar

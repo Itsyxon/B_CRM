@@ -1,40 +1,13 @@
 'use client'
+import { headerDictionary } from '@/lib/dictionaries'
+import { useSettings } from '@/context/SettingsContext'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
 const Header = () => {
     const pathName = usePathname()
-
-    const pageTitles: Record<string, { title: string, subTitle?: string }> = {
-        '/dashboard': {
-            title: 'Дашборд',
-        },
-        '/users': {
-            title: 'Пользователи',
-            subTitle: 'Список всех открытых пользователей платформы'
-        },
-        '/projects': {
-            title: 'Проекты',
-            subTitle: 'Проекты вашей компании'
-        },
-        '/staff': {
-            title: 'Персонал',
-            subTitle: 'Персонал вашей компании'
-        },
-        '/settings': {
-            title: 'Настройки',
-        },
-        '/help': {
-            title: 'Связаться с нами'
-        },
-        '/profile': {
-            title: 'Профиль'
-        },
-        '/search': {
-            title: 'Поиск'
-        }
-    }
-
+    const { own } = useSettings()
+    const pageTitles = headerDictionary[own.language]
     const pageName = pageTitles[pathName]
 
     return (

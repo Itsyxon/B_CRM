@@ -1,14 +1,16 @@
 'use client'
 import { useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { UserPermissionRole, UserType } from "@/types/UserTypes"
-import { ColumnDef } from "@tanstack/react-table"
+import { UserPermissionRole, UserType } from '@/types/UserTypes'
+import { ColumnDef } from '@tanstack/react-table'
 import {
     ShieldCheck, Users, UserCog, MoreHorizontal,
     UserCircle, RefreshCw, Mail, ClipboardList,
     CalendarPlus, Ban, ChevronRight,
-} from "lucide-react"
-import type { ReactNode } from "react"
+} from 'lucide-react'
+import type { ReactNode } from 'react'
+import { useSettings } from '@/context/SettingsContext'
+import { staffDictionary, localeMap } from '@/lib/dictionaries'
 
 // ── Shared ────────────────────────────────────────────────────────────────────
 
@@ -22,21 +24,16 @@ const getInitials = (name: string) =>
 
 const getAvatarColor = (id: number) => AVATAR_COLORS[id % AVATAR_COLORS.length]
 
-type RoleMeta = { label: string; className: string; icon: ReactNode }
-
-const roleMeta: Record<UserPermissionRole, RoleMeta> = {
+const ROLE_STYLES: Record<UserPermissionRole, { className: string; icon: ReactNode }> = {
     'Администратор': {
-        label: 'Администратор',
         className: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-500/10',
         icon: <ShieldCheck size={11} />,
     },
     'Руководитель отдела': {
-        label: 'Руководитель',
         className: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-500/10',
         icon: <UserCog size={11} />,
     },
     'Менеджер': {
-        label: 'Менеджер',
         className: 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/10',
         icon: <Users size={11} />,
     },
@@ -47,6 +44,10 @@ const ALL_ROLES: UserPermissionRole[] = ['Администратор', 'Руко
 // ── Staff action dropdown ─────────────────────────────────────────────────────
 
 const StaffActionsCell = ({ user }: { user: UserType }) => {
+    const { own } = useSettings()
+    const d = staffDictionary[own.language].actions
+    const roleLabels = staffDictionary[own.language].roles
+
     const [open, setOpen] = useState(false)
     const [showRoles, setShowRoles] = useState(false)
     const [dropPos, setDropPos] = useState({ top: 0, right: 0 })
@@ -91,7 +92,7 @@ const StaffActionsCell = ({ user }: { user: UserType }) => {
             className="w-52 bg-[var(--tertiary)] border border-[var(--border)] rounded-xl shadow-xl p-1.5"
             onMouseDown={(e) => e.preventDefault()}
         >
-            {item(<UserCircle size={15} />, 'Открыть профиль', () => {})}
+            {item(<UserCircle size={15} />, d.openProfile, () => {})}
 
             {/* Change role sub-menu */}
             <div>
@@ -100,7 +101,7 @@ const StaffActionsCell = ({ user }: { user: UserType }) => {
                     className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-md text-[var(--secondary)] hover:bg-[var(--navbar)] transition-colors cursor-pointer"
                 >
                     <RefreshCw size={15} className="shrink-0" />
-                    <span className="flex-1 text-left">Сменить роль</span>
+                    <span className="flex-1 text-left">{d.changeRole}</span>
                     <ChevronRight
                         size={12}
                         className={`text-[var(--accent-gray)] transition-transform duration-150 ${showRoles ? 'rotate-90' : ''}`}
@@ -115,23 +116,19 @@ const StaffActionsCell = ({ user }: { user: UserType }) => {
                                 className="w-full flex items-center gap-2 px-2 py-1.5 text-xs rounded-md text-[var(--accent-gray)] hover:bg-[var(--navbar)] hover:text-[var(--secondary)] transition-colors text-left cursor-pointer"
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--border)] shrink-0" />
-                                {role}
+                                {roleLabels[role] ?? role}
                             </button>
                         ))}
                     </div>
                 )}
             </div>
 
-            {item(
-                <Mail size={15} />,
-                'Написать письмо',
-                () => { window.location.href = `mailto:${user.email}` },
-            )}
-            {item(<ClipboardList size={15} />, 'Назначить задачу', () => {})}
-            {item(<CalendarPlus size={15} />, 'Запланировать встречу', () => {})}
+            {item(<Mail size={15} />, d.sendEmail, () => { window.location.href = `mailto:${user.email}` })}
+            {item(<ClipboardList size={15} />, d.assignTask, () => {})}
+            {item(<CalendarPlus size={15} />, d.scheduleMeeting, () => {})}
 
             <div className="h-px bg-[var(--border)] my-1" />
-            {item(<Ban size={15} />, 'Деактивировать', () => {}, true)}
+            {item(<Ban size={15} />, d.deactivate, () => {}, true)}
         </div>
     )
 
@@ -153,7 +150,9 @@ const StaffActionsCell = ({ user }: { user: UserType }) => {
 
 // ── Column definitions ────────────────────────────────────────────────────────
 
-export const staffColumns: ColumnDef<UserType>[] = [
+type StaffDictionary = typeof staffDictionary['ru']
+
+export const makeStaffColumns = (d: StaffDictionary, locale: string): ColumnDef<UserType>[] => [
     {
         accessorKey: 'id',
         header: 'ID',
@@ -166,7 +165,7 @@ export const staffColumns: ColumnDef<UserType>[] = [
     },
     {
         accessorKey: 'name',
-        header: 'Сотрудник',
+        header: d.columns.employee,
         cell: (info) => {
             const name = info.getValue() as string
             const id = info.row.original.id
@@ -189,25 +188,26 @@ export const staffColumns: ColumnDef<UserType>[] = [
     },
     {
         accessorKey: 'role',
-        header: 'Должность',
+        header: d.columns.role,
         cell: (info) => {
             const role = info.getValue() as UserPermissionRole
-            const meta = roleMeta[role]
-            if (!meta) return <span className="text-[var(--accent-gray)] text-sm">{role}</span>
+            const styles = ROLE_STYLES[role]
+            const label = d.roles[role] ?? role
+            if (!styles) return <span className="text-[var(--accent-gray)] text-sm">{label}</span>
             return (
-                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${meta.className}`}>
-                    {meta.icon}
-                    {meta.label}
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${styles.className}`}>
+                    {styles.icon}
+                    {label}
                 </span>
             )
         },
     },
     {
         accessorKey: 'createdAt',
-        header: 'В команде с',
+        header: d.columns.memberSince,
         cell: (info) => (
             <span className="text-[var(--accent-gray)] text-sm">
-                {new Date(info.getValue() as string).toLocaleDateString('ru-RU', {
+                {new Date(info.getValue() as string).toLocaleDateString(locale, {
                     day: 'numeric', month: 'short', year: 'numeric',
                 })}
             </span>

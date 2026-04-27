@@ -1,7 +1,9 @@
 'use client'
 import Logo from '@/components/atoms/Logo'
+import { navDictionary } from '@/lib/dictionaries'
+import { useSettings } from '@/context/SettingsContext'
 import {
-    ChevronLeft, ChevronRight,
+    ChevronLeft,
     CircleGauge, FolderKanban, LogOut, Menu,
     MessageCircleQuestionMark, Settings, ShieldUser,
     UserRoundCog, X,
@@ -10,25 +12,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useNavCollapse } from '@/context/NavCollapseContext'
-
-const navGroups = [
-    {
-        label: 'Основное',
-        links: [
-            { id: 1, label: 'Дашборд',     link: '/dashboard', Icon: CircleGauge },
-            { id: 2, label: 'Пользователи', link: '/users',     Icon: UserRoundCog },
-            { id: 3, label: 'Проекты',      link: '/projects',  Icon: FolderKanban },
-            { id: 4, label: 'Персонал',     link: '/staff',     Icon: ShieldUser },
-        ],
-    },
-    {
-        label: 'Система',
-        links: [
-            { id: 5, label: 'Настройки', link: '/settings', Icon: Settings },
-            { id: 6, label: 'Помощь',    link: '/help',     Icon: MessageCircleQuestionMark },
-        ],
-    },
-]
 
 const FaviconIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-7 h-7 shrink-0">
@@ -56,9 +39,29 @@ const NavBar = () => {
     const { isCollapsed, toggle } = useNavCollapse()
     const pathname = usePathname()
     const router = useRouter()
+    const { own } = useSettings()
+    const d = navDictionary[own.language]
 
-    // On mobile the menu slides in/out — always show expanded content while open
     const collapsed = isCollapsed && !isOpen
+
+    const navGroups = [
+        {
+            label: d.groups.main,
+            links: [
+                { id: 1, label: d.links.dashboard, link: '/dashboard', Icon: CircleGauge },
+                { id: 2, label: d.links.users,     link: '/users',     Icon: UserRoundCog },
+                { id: 3, label: d.links.projects,  link: '/projects',  Icon: FolderKanban },
+                { id: 4, label: d.links.staff,     link: '/staff',     Icon: ShieldUser },
+            ],
+        },
+        {
+            label: d.groups.system,
+            links: [
+                { id: 5, label: d.links.settings, link: '/settings', Icon: Settings },
+                { id: 6, label: d.links.help,     link: '/help',     Icon: MessageCircleQuestionMark },
+            ],
+        },
+    ]
 
     const handleLogout = () => {
         document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
@@ -74,7 +77,7 @@ const NavBar = () => {
             <button
                 onClick={() => setIsOpen(true)}
                 className="md:hidden fixed top-[10px] left-3 z-50 p-2 rounded-lg bg-[var(--navbar)] border border-[var(--border)] shadow-sm"
-                aria-label="Открыть меню"
+                aria-label={d.openMenu}
             >
                 <Menu size={18} />
             </button>
@@ -97,7 +100,7 @@ const NavBar = () => {
                 {collapsed ? (
                     <button
                         onClick={toggle}
-                        aria-label="Развернуть"
+                        aria-label={d.expand}
                         className="hidden md:flex w-full h-14 border-b border-[var(--border)] shrink-0 items-center justify-center hover:bg-[var(--border)] transition-colors cursor-pointer"
                     >
                         <FaviconIcon />
@@ -108,14 +111,14 @@ const NavBar = () => {
                         <button
                             onClick={toggle}
                             className="hidden md:flex shrink-0 w-7 h-7 items-center justify-center rounded-lg text-[var(--accent-gray)] hover:text-[var(--secondary)] hover:bg-[var(--border)] transition-colors cursor-pointer"
-                            aria-label="Свернуть"
+                            aria-label={d.collapse}
                         >
                             <ChevronLeft size={15} />
                         </button>
                         <button
                             onClick={close}
                             className="md:hidden shrink-0 p-1.5 rounded-md hover:bg-[var(--border)] transition text-[var(--accent-gray)] hover:text-[var(--foreground)]"
-                            aria-label="Закрыть меню"
+                            aria-label={d.closeMenu}
                         >
                             <X size={18} />
                         </button>
@@ -123,7 +126,6 @@ const NavBar = () => {
                 )}
 
                 {/* ── Nav groups ──────────────────────────────────────── */}
-                {/* overflow-y-auto only when expanded — allows tooltips to escape when collapsed */}
                 <div className={`flex-1 py-4 px-2 space-y-4 ${collapsed ? '' : 'overflow-y-auto'}`}>
                     {navGroups.map((group, idx) => (
                         <div key={group.label}>
@@ -188,10 +190,10 @@ const NavBar = () => {
                                 <p className="text-sm font-semibold text-[var(--secondary)] truncate leading-tight">
                                     Администратор
                                 </p>
-                                <p className="text-xs text-[var(--accent-gray)] truncate">Мой профиль</p>
+                                <p className="text-xs text-[var(--accent-gray)] truncate">{d.profile}</p>
                             </div>
                         )}
-                        {collapsed && <Tooltip label="Мой профиль" />}
+                        {collapsed && <Tooltip label={d.profile} />}
                     </Link>
 
                     <button
@@ -201,8 +203,8 @@ const NavBar = () => {
                         }`}
                     >
                         <LogOut size={16} className="shrink-0" />
-                        {!collapsed && <span>Выйти</span>}
-                        {collapsed && <Tooltip label="Выйти" />}
+                        {!collapsed && <span>{d.logout}</span>}
+                        {collapsed && <Tooltip label={d.logout} />}
                     </button>
                 </div>
             </nav>

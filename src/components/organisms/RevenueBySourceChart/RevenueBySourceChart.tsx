@@ -1,5 +1,7 @@
 'use client'
 import Content from '@/components/atoms/Content'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
 import { ArcElement, Chart as ChartJS, type ChartOptions, Legend, Tooltip } from 'chart.js'
 import { Doughnut } from 'react-chartjs-2'
 
@@ -19,8 +21,11 @@ const options: ChartOptions<'doughnut'> = {
 }
 
 const RevenueBySourceChart = () => {
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].charts.revenueBySource
+
     const chartData = {
-        labels: ['Прямые', 'Партнёры', 'Онлайн', 'Реферал'],
+        labels: d.sources,
         datasets: [
             {
                 data: [38, 27, 22, 13],
@@ -39,8 +44,8 @@ const RevenueBySourceChart = () => {
     return (
         <Content className="w-full">
             <div className="mb-4">
-                <h2 className="text-base font-semibold text-[var(--secondary)]">Выручка по источникам</h2>
-                <p className="text-xs text-[var(--accent-gray)] mt-0.5">Распределение за текущий месяц, %</p>
+                <h2 className="text-base font-semibold text-[var(--secondary)]">{d.title}</h2>
+                <p className="text-xs text-[var(--accent-gray)] mt-0.5">{d.subtitle}</p>
             </div>
             <div className="w-full h-[200px] sm:h-[220px]">
                 <Doughnut data={chartData} options={options} />

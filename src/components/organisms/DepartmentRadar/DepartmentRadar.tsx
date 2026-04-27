@@ -1,5 +1,7 @@
 'use client'
 import Content from '@/components/atoms/Content'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
 import {
     Chart as ChartJS,
     type ChartOptions,
@@ -14,7 +16,6 @@ import { Radar } from 'react-chartjs-2'
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
-const labels  = ['Продажи', 'Поддержка', 'Маркетинг', 'Разработка', 'Аналитика', 'HR']
 const current  = [85, 72, 91, 68, 80, 74]
 const previous = [70, 65, 78, 75, 60, 68]
 
@@ -41,11 +42,14 @@ const options: ChartOptions<'radar'> = {
 }
 
 const DepartmentRadar = () => {
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].charts.departmentRadar
+
     const data = {
-        labels,
+        labels: d.departments,
         datasets: [
             {
-                label: 'Текущий период',
+                label: d.currentPeriod,
                 data: current,
                 backgroundColor: 'rgba(60, 158, 255, 0.12)',
                 borderColor: 'rgba(60, 158, 255, 0.9)',
@@ -54,7 +58,7 @@ const DepartmentRadar = () => {
                 pointRadius: 3,
             },
             {
-                label: 'Прошлый период',
+                label: d.previousPeriod,
                 data: previous,
                 backgroundColor: 'rgba(251, 191, 36, 0.1)',
                 borderColor: 'rgba(251, 191, 36, 0.8)',
@@ -69,8 +73,8 @@ const DepartmentRadar = () => {
     return (
         <Content className='w-full'>
             <div className='mb-4'>
-                <h2 className='text-base font-semibold text-[var(--secondary)]'>Показатели отделов</h2>
-                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>Сравнение с прошлым периодом</p>
+                <h2 className='text-base font-semibold text-[var(--secondary)]'>{d.title}</h2>
+                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>{d.subtitle}</p>
             </div>
             <div className='w-full h-[220px] sm:h-[240px]'>
                 <Radar data={data} options={options} />

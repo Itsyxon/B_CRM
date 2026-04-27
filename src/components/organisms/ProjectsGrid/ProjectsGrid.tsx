@@ -27,58 +27,44 @@ import { createPortal } from 'react-dom'
 import Content from '@/components/atoms/Content'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import CreateProjectModal from '@/components/organisms/CreateProjectModal/CreateProjectModal'
+import { useSettings } from '@/context/SettingsContext'
+import { projectsDictionary, localeMap } from '@/lib/dictionaries'
 
 const PAGE_SIZE = 6
 
-const statusMeta: Record<
-  ProjectStatus,
-  { label: string; dot: string; badge: string }
-> = {
+const statusMeta: Record<ProjectStatus, { dot: string; badge: string }> = {
   active: {
-    label: 'Активный',
     dot: 'bg-emerald-500',
-    badge:
-      'text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/10',
+    badge: 'text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/10',
   },
   completed: {
-    label: 'Завершён',
     dot: 'bg-blue-500',
     badge: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-500/10',
   },
   paused: {
-    label: 'На паузе',
     dot: 'bg-amber-500',
-    badge:
-      'text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-500/10',
+    badge: 'text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-500/10',
   },
   cancelled: {
-    label: 'Отменён',
     dot: 'bg-rose-400',
     badge: 'text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/10',
   },
 }
 
-const priorityMeta: Record<
-  ProjectPriority,
-  { label: string; cls: string; dot: string }
-> = {
+const priorityMeta: Record<ProjectPriority, { cls: string; dot: string }> = {
   low: {
-    label: 'Низкий',
     cls: 'text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-500/10',
     dot: 'bg-slate-400',
   },
   medium: {
-    label: 'Средний',
     cls: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-500/10',
     dot: 'bg-amber-400',
   },
   high: {
-    label: 'Высокий',
     cls: 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/10',
     dot: 'bg-rose-500',
   },
   critical: {
-    label: 'Критический',
     cls: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-500/10',
     dot: 'bg-red-600',
   },
@@ -110,34 +96,11 @@ const getInitials = (name: string) =>
     .toUpperCase()
 const getColor = (id: number) => AVATAR_COLORS[id % AVATAR_COLORS.length]
 
-const formatDate = (s: string) =>
-  new Date(s).toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-
 type Filter = 'all' | ProjectStatus
 type PriorityFilter = 'all' | ProjectPriority
 
-const FILTERS: { value: Filter; label: string }[] = [
-  { value: 'all', label: 'Все' },
-  { value: 'active', label: 'Активные' },
-  { value: 'paused', label: 'На паузе' },
-  { value: 'completed', label: 'Завершены' },
-  { value: 'cancelled', label: 'Отменены' },
-]
-
-const PRIORITY_FILTERS: { value: PriorityFilter; label: string }[] = [
-  { value: 'all', label: 'Любой' },
-  { value: 'low', label: 'Низкий' },
-  { value: 'medium', label: 'Средний' },
-  { value: 'high', label: 'Высокий' },
-  { value: 'critical', label: 'Критический' },
-]
-
-const VALID_FILTERS = FILTERS.map((f) => f.value)
-const VALID_PRIORITY_FILTERS = PRIORITY_FILTERS.map((f) => f.value)
+const VALID_FILTERS: Filter[] = ['all', 'active', 'paused', 'completed', 'cancelled']
+const VALID_PRIORITY_FILTERS: PriorityFilter[] = ['all', 'low', 'medium', 'high', 'critical']
 
 const FilterDropdown = ({
   label,
@@ -195,6 +158,16 @@ const ProjectDetailModal = ({
   onClose: () => void
   onUpdate: (updated: Project) => void
 }) => {
+  const { own } = useSettings()
+  const d = projectsDictionary[own.language]
+  const locale = localeMap[own.language]
+  const formatDate = (s: string) =>
+    new Date(s).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+
   const queryClient = useQueryClient()
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -251,16 +224,16 @@ const ProjectDetailModal = ({
                   className={`flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${sm.badge}`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${sm.dot}`} />
-                  {sm.label}
+                  {d.statusLabels[project.status]}
                 </span>
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${pm.cls}`}
                 >
-                  {pm.label}
+                  {d.priorityLabels[project.priority]}
                 </span>
                 {isOverdue && (
                   <span className='text-[10px] font-semibold px-2 py-0.5 rounded-full text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-500/10'>
-                    Просрочен
+                    {d.card.overdue}
                   </span>
                 )}
               </div>
@@ -283,7 +256,7 @@ const ProjectDetailModal = ({
           {project.description ? (
             <div>
               <p className='text-xs font-semibold text-[var(--accent-gray)] uppercase tracking-wide mb-2'>
-                Описание
+                {d.modal.description}
               </p>
               <p className='text-sm text-[var(--foreground)] leading-relaxed'>
                 {project.description}
@@ -291,7 +264,7 @@ const ProjectDetailModal = ({
             </div>
           ) : (
             <p className='text-sm text-[var(--accent-gray)] italic'>
-              Описание не указано
+              {d.modal.noDescription}
             </p>
           )}
 
@@ -300,7 +273,7 @@ const ProjectDetailModal = ({
             <div className='flex items-center justify-between mb-2.5'>
               <div className='flex items-center gap-1.5 text-sm font-medium text-[var(--secondary)]'>
                 <TrendingUp size={14} className='text-[var(--accent-gray)]' />
-                Прогресс
+                {d.modal.progress}
               </div>
               <span
                 className={`text-xl font-bold ${project.progress === 100 ? 'text-blue-500' : 'text-[var(--secondary)]'}`}
@@ -320,44 +293,33 @@ const ProjectDetailModal = ({
           <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
             <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
               <div className='flex items-center gap-1 mb-1.5'>
-                <CalendarDays
-                  size={11}
-                  className='text-[var(--accent-gray)] shrink-0'
-                />
+                <CalendarDays size={11} className='text-[var(--accent-gray)] shrink-0' />
                 <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
-                  Дедлайн
+                  {d.modal.deadline}
                 </p>
               </div>
-              <p
-                className={`text-sm font-semibold leading-snug ${isOverdue ? 'text-rose-500' : 'text-[var(--secondary)]'}`}
-              >
+              <p className={`text-sm font-semibold leading-snug ${isOverdue ? 'text-rose-500' : 'text-[var(--secondary)]'}`}>
                 {formatDate(project.deadline)}
               </p>
             </div>
 
             <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
               <div className='flex items-center gap-1 mb-1.5'>
-                <Users
-                  size={11}
-                  className='text-[var(--accent-gray)] shrink-0'
-                />
+                <Users size={11} className='text-[var(--accent-gray)] shrink-0' />
                 <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
-                  Команда
+                  {d.modal.team}
                 </p>
               </div>
               <p className='text-sm font-semibold text-[var(--secondary)]'>
-                {project.teamSize} чел.
+                {d.modal.persons(project.teamSize)}
               </p>
             </div>
 
             <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
               <div className='flex items-center gap-1 mb-1.5'>
-                <DollarSign
-                  size={11}
-                  className='text-[var(--accent-gray)] shrink-0'
-                />
+                <DollarSign size={11} className='text-[var(--accent-gray)] shrink-0' />
                 <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
-                  Бюджет
+                  {d.modal.budget}
                 </p>
               </div>
               <p className='text-sm font-semibold text-[var(--secondary)]'>
@@ -367,12 +329,9 @@ const ProjectDetailModal = ({
 
             <div className='bg-[var(--navbar)] rounded-xl p-3 sm:p-4'>
               <div className='flex items-center gap-1 mb-1.5'>
-                <Clock
-                  size={11}
-                  className='text-[var(--accent-gray)] shrink-0'
-                />
+                <Clock size={11} className='text-[var(--accent-gray)] shrink-0' />
                 <p className='text-[10px] font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
-                  Создан
+                  {d.modal.created}
                 </p>
               </div>
               <p className='text-sm font-semibold text-[var(--secondary)] leading-snug'>
@@ -387,7 +346,7 @@ const ProjectDetailModal = ({
               <div className='flex items-center gap-1.5 mb-2'>
                 <Tag size={11} className='text-[var(--accent-gray)]' />
                 <p className='text-xs font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
-                  Теги
+                  {d.modal.tags}
                 </p>
               </div>
               <div className='flex flex-wrap gap-2'>
@@ -409,7 +368,7 @@ const ProjectDetailModal = ({
               <div className='flex items-center gap-1.5 mb-2'>
                 <Users size={11} className='text-[var(--accent-gray)]' />
                 <p className='text-xs font-semibold text-[var(--accent-gray)] uppercase tracking-wide'>
-                  Ответственные
+                  {d.modal.assignees}
                 </p>
               </div>
               <div className='flex flex-wrap gap-2'>
@@ -440,20 +399,20 @@ const ProjectDetailModal = ({
           {confirmDelete ? (
             <div className='flex items-center justify-between gap-3'>
               <p className='text-sm text-[var(--foreground)]'>
-                Удалить проект? Это действие необратимо.
+                {d.modal.confirmText}
               </p>
               <div className='flex items-center gap-2 shrink-0'>
                 <button
                   onClick={() => setConfirmDelete(false)}
                   className='px-3 py-1.5 rounded-lg text-sm font-medium border border-[var(--border)] bg-[var(--tertiary)] text-[var(--accent-gray)] hover:text-[var(--secondary)] transition-colors cursor-pointer'
                 >
-                  Отмена
+                  {d.modal.cancelDelete}
                 </button>
                 <button
                   onClick={deleteProject}
                   className='px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors cursor-pointer'
                 >
-                  Удалить
+                  {d.modal.confirmDelete}
                 </button>
               </div>
             </div>
@@ -465,7 +424,7 @@ const ProjectDetailModal = ({
                   className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors cursor-pointer'
                 >
                   <CheckCircle2 size={14} />
-                  Завершить
+                  {d.modal.complete}
                 </button>
               )}
               {project.status === 'active' && (
@@ -474,7 +433,7 @@ const ProjectDetailModal = ({
                   className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 dark:text-amber-400 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-colors cursor-pointer'
                 >
                   <Pause size={14} />
-                  Приостановить
+                  {d.modal.pause}
                 </button>
               )}
               {(project.status === 'paused' || project.status === 'cancelled') && (
@@ -483,7 +442,7 @@ const ProjectDetailModal = ({
                   className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-colors cursor-pointer'
                 >
                   <Play size={14} />
-                  Возобновить
+                  {d.modal.resume}
                 </button>
               )}
               {project.status !== 'cancelled' && (
@@ -492,7 +451,7 @@ const ProjectDetailModal = ({
                   className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-colors cursor-pointer'
                 >
                   <Ban size={14} />
-                  Отменить
+                  {d.modal.cancelAction}
                 </button>
               )}
               <button
@@ -500,7 +459,7 @@ const ProjectDetailModal = ({
                 className='ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--accent-gray)] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 border border-[var(--border)] hover:border-red-200 dark:hover:border-red-500/30 transition-colors cursor-pointer'
               >
                 <Trash2 size={14} />
-                Удалить
+                {d.modal.delete}
               </button>
             </div>
           )}
@@ -519,6 +478,16 @@ const ProjectCard = ({
   project: Project
   onClick: () => void
 }) => {
+  const { own } = useSettings()
+  const d = projectsDictionary[own.language]
+  const locale = localeMap[own.language]
+  const formatDate = (s: string) =>
+    new Date(s).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+
   const sm = statusMeta[project.status]
   const pm = priorityMeta[project.priority]
   const pc = progressColor(project.progress)
@@ -557,10 +526,8 @@ const ProjectCard = ({
             </span>
           ))}
         </div>
-        <span
-          className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${pm.cls}`}
-        >
-          {pm.label}
+        <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${pm.cls}`}>
+          {d.priorityLabels[project.priority]}
         </span>
       </div>
 
@@ -575,10 +542,8 @@ const ProjectCard = ({
 
       <div>
         <div className='flex items-center justify-between mb-1.5'>
-          <span className='text-xs text-[var(--accent-gray)]'>Прогресс</span>
-          <span
-            className={`text-xs font-bold ${project.progress === 100 ? 'text-blue-500' : 'text-[var(--secondary)]'}`}
-          >
+          <span className='text-xs text-[var(--accent-gray)]'>{d.card.progress}</span>
+          <span className={`text-xs font-bold ${project.progress === 100 ? 'text-blue-500' : 'text-[var(--secondary)]'}`}>
             {project.progress}%
           </span>
         </div>
@@ -620,19 +585,15 @@ const ProjectCard = ({
             <Users size={11} />
             {project.teamSize}
           </span>
-          <span
-            className={`flex items-center gap-1 ${isOverdue ? 'text-rose-500 font-medium' : ''}`}
-          >
+          <span className={`flex items-center gap-1 ${isOverdue ? 'text-rose-500 font-medium' : ''}`}>
             <CalendarDays size={11} />
             {formatDate(project.deadline)}
           </span>
         </div>
       </div>
-      <span
-        className={`self-start flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${sm.badge}`}
-      >
+      <span className={`self-start flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full ${sm.badge}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${sm.dot}`} />
-        {sm.label}
+        {d.statusLabels[project.status]}
       </span>
     </div>
   )
@@ -665,6 +626,25 @@ const SkeletonCard = () => (
 )
 
 const ProjectsGrid = () => {
+  const { own } = useSettings()
+  const d = projectsDictionary[own.language]
+
+  const FILTERS: { value: Filter; label: string }[] = [
+    { value: 'all', label: d.filters.all },
+    { value: 'active', label: d.filters.active },
+    { value: 'paused', label: d.filters.paused },
+    { value: 'completed', label: d.filters.completed },
+    { value: 'cancelled', label: d.filters.cancelled },
+  ]
+
+  const PRIORITY_FILTERS: { value: PriorityFilter; label: string }[] = [
+    { value: 'all', label: d.priorityFilters.all },
+    { value: 'low', label: d.priorityFilters.low },
+    { value: 'medium', label: d.priorityFilters.medium },
+    { value: 'high', label: d.priorityFilters.high },
+    { value: 'critical', label: d.priorityFilters.critical },
+  ]
+
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -748,7 +728,11 @@ const ProjectsGrid = () => {
           p.tags.some((t) => t.toLowerCase().includes(q))
         return matchStatus && matchPriority && matchTags && matchSearch
       })
-      .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+      .sort((a, b) => {
+        const byDate = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        if (byDate !== 0) return byDate
+        return priorityOrder[a.priority] - priorityOrder[b.priority]
+      })
   }, [projects, filter, priorityFilter, tagFilter, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
@@ -807,7 +791,7 @@ const ProjectsGrid = () => {
   if (isError) {
     return (
       <Content>
-        <p className='text-red-500 text-sm'>Ошибка загрузки проектов</p>
+        <p className='text-red-500 text-sm'>{d.error}</p>
       </Content>
     )
   }
@@ -833,7 +817,7 @@ const ProjectsGrid = () => {
             <input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder='Поиск по проектам...'
+              placeholder={d.searchPlaceholder}
               className='w-full pl-9 pr-8 py-2 text-sm bg-[var(--tertiary)] border border-[var(--border)] rounded-lg focus:outline-none focus:border-[var(--info)] focus:ring-2 focus:ring-[var(--info)]/15 text-[var(--foreground)] placeholder:text-[var(--accent-gray)] transition-all'
             />
             {search && (
@@ -848,18 +832,16 @@ const ProjectsGrid = () => {
 
           <div className='flex items-center gap-3 shrink-0'>
             <p className='text-sm text-[var(--accent-gray)]'>
-              Найдено{' '}
               <span className='font-semibold text-[var(--foreground)]'>
-                {filtered.length}
-              </span>{' '}
-              проектов
+                {d.found(filtered.length)}
+              </span>
             </p>
             <button
               onClick={() => setModalOpen(true)}
               className='flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white bg-[var(--info)] rounded-lg hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0'
             >
               <Plus size={15} />
-              Создать проект
+              {d.createButton}
             </button>
           </div>
         </div>
@@ -870,13 +852,11 @@ const ProjectsGrid = () => {
             label={
               filter !== 'all' ? (
                 <span className='flex items-center gap-1.5'>
-                  <span
-                    className={`w-2 h-2 rounded-full shrink-0 ${statusMeta[filter as ProjectStatus].dot}`}
-                  />
-                  {statusMeta[filter as ProjectStatus].label}
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${statusMeta[filter as ProjectStatus].dot}`} />
+                  {d.statusLabels[filter as ProjectStatus]}
                 </span>
               ) : (
-                'Статус'
+                d.statusDropdown
               )
             }
           >
@@ -901,9 +881,7 @@ const ProjectsGrid = () => {
                     >
                       <span className='flex items-center gap-2'>
                         {f.value !== 'all' && (
-                          <span
-                            className={`w-2 h-2 rounded-full ${statusMeta[f.value].dot}`}
-                          />
+                          <span className={`w-2 h-2 rounded-full ${statusMeta[f.value].dot}`} />
                         )}
                         {f.label}
                       </span>
@@ -922,13 +900,11 @@ const ProjectsGrid = () => {
             label={
               priorityFilter !== 'all' ? (
                 <span className='flex items-center gap-1.5'>
-                  <span
-                    className={`w-2 h-2 rounded-full shrink-0 ${priorityMeta[priorityFilter as ProjectPriority].dot}`}
-                  />
-                  {priorityMeta[priorityFilter as ProjectPriority].label}
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${priorityMeta[priorityFilter as ProjectPriority].dot}`} />
+                  {d.priorityLabels[priorityFilter as ProjectPriority]}
                 </span>
               ) : (
-                'Приоритет'
+                d.priorityDropdown
               )
             }
           >
@@ -966,9 +942,7 @@ const ProjectsGrid = () => {
           {allTags.length > 0 && (
             <FilterDropdown
               active={tagFilter.length > 0}
-              label={
-                tagFilter.length > 0 ? `Теги (${tagFilter.length})` : 'Теги'
-              }
+              label={d.tagsDropdown(tagFilter.length)}
             >
               {() => (
                 <>
@@ -993,11 +967,7 @@ const ProjectsGrid = () => {
                           }`}
                         >
                           {isActive && (
-                            <Check
-                              size={9}
-                              strokeWidth={3}
-                              className='text-white'
-                            />
+                            <Check size={9} strokeWidth={3} className='text-white' />
                           )}
                         </span>
                         {tag}
@@ -1009,9 +979,7 @@ const ProjectsGrid = () => {
             </FilterDropdown>
           )}
 
-          {(filter !== 'all' ||
-            priorityFilter !== 'all' ||
-            tagFilter.length > 0) && (
+          {(filter !== 'all' || priorityFilter !== 'all' || tagFilter.length > 0) && (
             <button
               type='button'
               onClick={() => {
@@ -1024,7 +992,7 @@ const ProjectsGrid = () => {
               className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--accent-gray)] hover:text-rose-500 border border-[var(--border)] hover:border-rose-300 dark:hover:border-rose-500/40 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer whitespace-nowrap'
             >
               <X size={13} />
-              Сбросить
+              {d.resetFilters}
             </button>
           )}
         </div>
@@ -1035,10 +1003,10 @@ const ProjectsGrid = () => {
               <Search size={22} className='text-[var(--accent-gray)]' />
             </div>
             <p className='text-base font-semibold text-[var(--secondary)]'>
-              Проекты не найдены
+              {d.empty.title}
             </p>
             <p className='text-sm text-[var(--accent-gray)] mt-1'>
-              Попробуйте изменить фильтр или запрос
+              {d.empty.subtitle}
             </p>
           </div>
         ) : (
@@ -1056,11 +1024,11 @@ const ProjectsGrid = () => {
         {totalPages > 1 && (
           <div className='flex items-center justify-between pt-2'>
             <p className='text-xs text-[var(--accent-gray)]'>
-              Страница{' '}
+              {d.pagination.page}{' '}
               <span className='font-semibold text-[var(--foreground)]'>
                 {safePage}
               </span>{' '}
-              из{' '}
+              {d.pagination.of}{' '}
               <span className='font-semibold text-[var(--foreground)]'>
                 {totalPages}
               </span>

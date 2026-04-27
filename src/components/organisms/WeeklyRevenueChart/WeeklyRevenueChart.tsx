@@ -1,5 +1,7 @@
 'use client'
 import Content from '@/components/atoms/Content'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
 import {
     CategoryScale,
     Chart as ChartJS,
@@ -15,7 +17,6 @@ import { Line } from 'react-chartjs-2'
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Filler, Tooltip, Legend)
 
-const labels = ['Нед. 1', 'Нед. 2', 'Нед. 3', 'Нед. 4', 'Нед. 5', 'Нед. 6', 'Нед. 7', 'Нед. 8']
 const revenue = [45, 52, 49, 61, 58, 67, 72, 78]
 const target  = [50, 50, 55, 55, 60, 60, 65, 70]
 
@@ -48,11 +49,14 @@ const options: ChartOptions<'line'> = {
 }
 
 const WeeklyRevenueChart = () => {
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].charts.weeklyRevenue
+
     const data = {
-        labels,
+        labels: d.weekLabels,
         datasets: [
             {
-                label: 'Выручка',
+                label: d.revenue,
                 data: revenue,
                 borderColor: 'rgba(60, 158, 255, 0.9)',
                 backgroundColor: 'rgba(60, 158, 255, 0.08)',
@@ -64,7 +68,7 @@ const WeeklyRevenueChart = () => {
                 borderWidth: 2,
             },
             {
-                label: 'План',
+                label: d.plan,
                 data: target,
                 borderColor: 'rgba(251, 146, 60, 0.8)',
                 backgroundColor: 'transparent',
@@ -82,8 +86,8 @@ const WeeklyRevenueChart = () => {
         <Content className='w-full'>
             <div className='flex items-start justify-between mb-4'>
                 <div>
-                    <h2 className='text-base font-semibold text-[var(--secondary)]'>Еженедельная выручка</h2>
-                    <p className='text-xs text-[var(--accent-gray)] mt-0.5'>Факт vs план, тыс. ₽</p>
+                    <h2 className='text-base font-semibold text-[var(--secondary)]'>{d.title}</h2>
+                    <p className='text-xs text-[var(--accent-gray)] mt-0.5'>{d.subtitle}</p>
                 </div>
             </div>
             <div className='w-full h-[200px] sm:h-[220px]'>

@@ -1,14 +1,16 @@
 'use client'
 import { useSettings } from '@/context/SettingsContext'
+import { settingsDictionary } from '@/lib/dictionaries'
 import { Theme } from '@/types/SettingsTypes'
-
-const options: { value: Theme; label: string }[] = [
-    { value: 'light', label: 'Светлая' },
-    { value: 'dark', label: 'Тёмная' },
-]
 
 const ThemeToggle = () => {
     const { own, updateOwn } = useSettings()
+    const labels = settingsDictionary[own.language].theme
+
+    const options: { value: Theme; label: string }[] = [
+        { value: 'light', label: labels.light },
+        { value: 'dark',  label: labels.dark },
+    ]
 
     return (
         <div className="inline-flex rounded-lg overflow-hidden border border-[var(--border)]">

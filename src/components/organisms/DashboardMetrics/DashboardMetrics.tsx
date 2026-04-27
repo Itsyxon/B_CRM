@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
 
 const Sparkline = ({
   data,
@@ -143,13 +145,15 @@ function tick(m: M): M {
 }
 
 const card =
-  'rounded-xl border border-[var(--border)] bg-[var(--tertiary)] p-4 flex flex-col gap-2'
+  'rounded-xl border border-[var(--border)] shadow-sm bg-[var(--tertiary)] p-4 flex flex-col gap-2'
 const val =
   'text-xl xl:text-2xl font-bold text-[var(--foreground)] tabular-nums'
 
 const DashboardMetrics = ({ compact }: { compact?: boolean }) => {
   const [m, setM] = useState<M>(INITIAL)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const { own } = useSettings()
+  const d = dashboardDictionary[own.language].metrics
 
   useEffect(() => {
     const schedule = () => {
@@ -174,51 +178,46 @@ const DashboardMetrics = ({ compact }: { compact?: boolean }) => {
     <div className='grid grid-cols-2 xl:grid-cols-4 gap-4'>
       {/* 1 – Конверсия */}
       <div className={card}>
-        <p className='text-xs text-[var(--accent-gray)]'>Конверсия сделок</p>
+        <p className='text-xs text-[var(--accent-gray)]'>{d.convRate}</p>
         <p className={val}>{m.conv}%</p>
         <div className='h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden'>
           <div
             className='h-full bg-emerald-500 rounded-full'
-            style={{
-              width: `${convPct}%`,
-              transition: 'width 0.7s ease-in-out',
-            }}
+            style={{ width: `${convPct}%`, transition: 'width 0.7s ease-in-out' }}
           />
         </div>
-        <p className='text-xs text-emerald-500 font-medium'>
-          +4.1% к прошлому мес.
-        </p>
+        <p className='text-xs text-emerald-500 font-medium'>{d.convTrend}</p>
       </div>
 
       {/* 2 – Новые клиенты */}
       <div className={card}>
-        <p className='text-xs text-[var(--accent-gray)]'>Новые клиенты</p>
+        <p className='text-xs text-[var(--accent-gray)]'>{d.newClients}</p>
         <div className='flex items-end justify-between gap-2'>
           <div>
             <p className={val}>{m.clients}</p>
-            <p className='text-xs text-[var(--accent-gray)] mt-0.5'>за месяц</p>
+            <p className='text-xs text-[var(--accent-gray)] mt-0.5'>{d.newClientsPerMonth}</p>
           </div>
           <Sparkline data={m.clientsSpark} strokeClass='stroke-blue-500' />
         </div>
-        <p className='text-xs text-blue-500 font-medium'>+12 к прошлому мес.</p>
+        <p className='text-xs text-blue-500 font-medium'>{d.newClientsTrend}</p>
       </div>
 
       {/* 3 – Ср. время сделки */}
       <div className={card}>
-        <p className='text-xs text-[var(--accent-gray)]'>Ср. время сделки</p>
+        <p className='text-xs text-[var(--accent-gray)]'>{d.avgDealTime}</p>
         <div className='flex items-center gap-3'>
           <Ring pct={dealPct} strokeClass='stroke-amber-500' />
           <div>
             <p className={`${val} leading-none`}>{m.deal}</p>
-            <p className='text-xs text-[var(--accent-gray)] mt-1'>дня</p>
+            <p className='text-xs text-[var(--accent-gray)] mt-1'>{d.avgDealDays}</p>
           </div>
         </div>
-        <p className='text-xs text-amber-500 font-medium'>−0.8 дн. от нормы</p>
+        <p className='text-xs text-amber-500 font-medium'>{d.avgDealTrend}</p>
       </div>
 
       {/* 4 – Задачи */}
       <div className={card}>
-        <p className='text-xs text-[var(--accent-gray)]'>Задачи выполнены</p>
+        <p className='text-xs text-[var(--accent-gray)]'>{d.tasks}</p>
         <p className={val}>
           {m.tasks}{' '}
           <span className='text-sm xl:text-base font-medium text-[var(--accent-gray)]'>
@@ -228,52 +227,43 @@ const DashboardMetrics = ({ compact }: { compact?: boolean }) => {
         <div className='h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden'>
           <div
             className='h-full bg-violet-500 rounded-full'
-            style={{
-              width: `${tasksPct}%`,
-              transition: 'width 0.7s ease-in-out',
-            }}
+            style={{ width: `${tasksPct}%`, transition: 'width 0.7s ease-in-out' }}
           />
         </div>
-        <p className='text-xs text-[var(--accent-gray)]'>Текущий спринт</p>
+        <p className='text-xs text-[var(--accent-gray)]'>{d.tasksSprint}</p>
       </div>
 
       {!compact && (
         <>
           {/* 5 – MRR */}
           <div className={card}>
-            <p className='text-xs text-[var(--accent-gray)]'>MRR</p>
+            <p className='text-xs text-[var(--accent-gray)]'>{d.mrr}</p>
             <div className='flex items-end justify-between gap-2'>
               <div>
                 <p className={val}>{m.mrr}M</p>
-                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>
-                  ₽ / мес.
-                </p>
+                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>{d.mrrPer}</p>
               </div>
               <Sparkline data={m.mrrSpark} strokeClass='stroke-violet-500' />
             </div>
-            <p className='text-xs text-violet-500 font-medium'>
-              +8.3% к прошлому мес.
-            </p>
+            <p className='text-xs text-violet-500 font-medium'>{d.mrrTrend}</p>
           </div>
 
           {/* 6 – NPS */}
           <div className={card}>
-            <p className='text-xs text-[var(--accent-gray)]'>NPS</p>
+            <p className='text-xs text-[var(--accent-gray)]'>{d.nps}</p>
             <div className='flex items-center gap-3'>
               <Ring pct={m.nps} strokeClass='stroke-emerald-500' />
               <div>
                 <p className={`${val} leading-none`}>{m.nps}</p>
-                <p className='text-xs text-[var(--accent-gray)] mt-1'>из 100</p>
+                <p className='text-xs text-[var(--accent-gray)] mt-1'>{d.npsOf}</p>
               </div>
             </div>
-            <p className='text-xs text-emerald-500 font-medium'>
-              +5 пт. к прошлому мес.
-            </p>
+            <p className='text-xs text-emerald-500 font-medium'>{d.npsTrend}</p>
           </div>
 
           {/* 7 – Средний чек */}
           <div className={card}>
-            <p className='text-xs text-[var(--accent-gray)]'>Средний чек</p>
+            <p className='text-xs text-[var(--accent-gray)]'>{d.avgCheck}</p>
             <div className='flex items-baseline gap-1 min-w-0'>
               <p className={`${val} truncate`}>
                 {m.check.toLocaleString('ru-RU')}
@@ -285,32 +275,23 @@ const DashboardMetrics = ({ compact }: { compact?: boolean }) => {
             <div className='h-1.5 w-full bg-[var(--border)] rounded-full overflow-hidden'>
               <div
                 className='h-full bg-amber-500 rounded-full'
-                style={{
-                  width: `${checkPct}%`,
-                  transition: 'width 0.7s ease-in-out',
-                }}
+                style={{ width: `${checkPct}%`, transition: 'width 0.7s ease-in-out' }}
               />
             </div>
-            <p className='text-xs text-amber-500 font-medium'>
-              +2 100 ₽ к прошлому мес.
-            </p>
+            <p className='text-xs text-amber-500 font-medium'>{d.avgCheckTrend}</p>
           </div>
 
           {/* 8 – Отток */}
           <div className={card}>
-            <p className='text-xs text-[var(--accent-gray)]'>Отток клиентов</p>
+            <p className='text-xs text-[var(--accent-gray)]'>{d.churn}</p>
             <div className='flex items-end justify-between gap-2'>
               <div>
                 <p className={val}>{m.churn}%</p>
-                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>
-                  за месяц
-                </p>
+                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>{d.churnPerMonth}</p>
               </div>
               <Sparkline data={m.churnSpark} strokeClass='stroke-rose-500' />
             </div>
-            <p className='text-xs text-emerald-500 font-medium'>
-              −0.4% к прошлому мес.
-            </p>
+            <p className='text-xs text-emerald-500 font-medium'>{d.churnTrend}</p>
           </div>
         </>
       )}

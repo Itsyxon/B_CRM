@@ -12,6 +12,8 @@ import {
   Copy,
   ShieldOff,
 } from 'lucide-react'
+import { useSettings } from '@/context/SettingsContext'
+import { usersDictionary, localeMap } from '@/lib/dictionaries'
 
 const AVATAR_COLORS = [
   'bg-blue-500',
@@ -35,6 +37,9 @@ const getInitials = (name: string) =>
 const getAvatarColor = (id: number) => AVATAR_COLORS[id % AVATAR_COLORS.length]
 
 const UsersActionsCell = ({ user }: { user: UserType }) => {
+  const { own } = useSettings()
+  const d = usersDictionary[own.language].actions
+
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [dropPos, setDropPos] = useState({ top: 0, right: 0 })
@@ -75,11 +80,11 @@ const UsersActionsCell = ({ user }: { user: UserType }) => {
     >
       <button className={item} onClick={() => setOpen(false)}>
         <UserPlus size={14} className='text-[var(--info)] shrink-0' />
-        Пригласить в компанию
+        {d.invite}
       </button>
       <button className={item} onClick={() => setOpen(false)}>
         <User size={14} className='text-[var(--accent-gray)] shrink-0' />
-        Открыть профиль
+        {d.openProfile}
       </button>
       <a
         href={`mailto:${user.email}`}
@@ -87,20 +92,20 @@ const UsersActionsCell = ({ user }: { user: UserType }) => {
         onClick={() => setOpen(false)}
       >
         <Mail size={14} className='text-[var(--accent-gray)] shrink-0' />
-        Написать письмо
+        {d.sendEmail}
       </a>
       <button className={item} onClick={() => setOpen(false)}>
         <FolderPlus size={14} className='text-[var(--accent-gray)] shrink-0' />
-        Добавить в проект
+        {d.addToProject}
       </button>
       <button className={item} onClick={handleCopyEmail}>
         <Copy size={14} className='text-[var(--accent-gray)] shrink-0' />
-        {copied ? 'Скопировано!' : 'Скопировать email'}
+        {copied ? d.copied : d.copyEmail}
       </button>
       <div className='my-1 border-t border-[var(--border)]' />
       <button className={danger} onClick={() => setOpen(false)}>
         <ShieldOff size={14} className='shrink-0' />
-        Заблокировать
+        {d.block}
       </button>
     </div>
   ) : null
@@ -121,7 +126,9 @@ const UsersActionsCell = ({ user }: { user: UserType }) => {
   )
 }
 
-export const userColumns: ColumnDef<UserType>[] = [
+type UsersDictionary = typeof usersDictionary['ru']
+
+export const makeUserColumns = (d: UsersDictionary, locale: string): ColumnDef<UserType>[] => [
   {
     accessorKey: 'id',
     header: 'ID',
@@ -134,7 +141,7 @@ export const userColumns: ColumnDef<UserType>[] = [
   },
   {
     accessorKey: 'name',
-    header: 'Пользователь',
+    header: d.columns.user,
     cell: (info) => {
       const name = info.getValue() as string
       const id = info.row.original.id
@@ -163,10 +170,10 @@ export const userColumns: ColumnDef<UserType>[] = [
   },
   {
     accessorKey: 'createdAt',
-    header: 'Регистрация',
+    header: d.columns.registered,
     cell: (info) => (
       <span className='text-[var(--accent-gray)] text-sm'>
-        {new Date(info.getValue() as string).toLocaleDateString('ru-RU', {
+        {new Date(info.getValue() as string).toLocaleDateString(locale, {
           day: 'numeric',
           month: 'short',
           year: 'numeric',
@@ -181,3 +188,4 @@ export const userColumns: ColumnDef<UserType>[] = [
     cell: (info) => <UsersActionsCell user={info.row.original} />,
   },
 ]
+

@@ -1,9 +1,11 @@
 'use client'
-import { useNews } from "@/app/api/news/useNews";
-import Button from "@/components/atoms/Button";
-import Content from "@/components/atoms/Content";
-import Loader from "@/components/atoms/Loader";
-import { MessageSquareMore, Repeat2, ThumbsUp } from "lucide-react";
+import { useNews } from "@/app/api/news/useNews"
+import Button from "@/components/atoms/Button"
+import Content from "@/components/atoms/Content"
+import Loader from "@/components/atoms/Loader"
+import { useSettings } from "@/context/SettingsContext"
+import { dashboardDictionary, localeMap } from "@/lib/dictionaries"
+import { MessageSquareMore, Repeat2, ThumbsUp } from "lucide-react"
 
 const SkeletonCard = () => (
     <div className="animate-pulse rounded-lg border border-[var(--border)] p-4 space-y-2.5">
@@ -19,10 +21,14 @@ const SkeletonCard = () => (
     </div>
 )
 
-const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
-
 const DashboardNews = () => {
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].news
+    const locale = localeMap[own.language]
+
+    const formatDate = (iso: string) =>
+        new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short' })
+
     const {
         data: newsData,
         fetchNextPage,
@@ -49,7 +55,7 @@ const DashboardNews = () => {
     if (isError) {
         return (
             <Content className="w-full">
-                <p className="text-red-500 text-sm">Ошибка загрузки новостей</p>
+                <p className="text-red-500 text-sm">{d.error}</p>
             </Content>
         )
     }
@@ -58,8 +64,8 @@ const DashboardNews = () => {
         <Content className="w-full">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h2 className="text-base font-semibold text-[var(--secondary)]">Лента обновлений</h2>
-                    <p className="text-xs text-[var(--accent-gray)] mt-0.5">{total} записей</p>
+                    <h2 className="text-base font-semibold text-[var(--secondary)]">{d.title}</h2>
+                    <p className="text-xs text-[var(--accent-gray)] mt-0.5">{total} {d.records}</p>
                 </div>
             </div>
 
@@ -97,7 +103,7 @@ const DashboardNews = () => {
                 {isFetchingNextPage && (
                     <div className="flex items-center justify-center gap-2 py-1.5 text-sm text-[var(--accent-gray)]">
                         <Loader className="w-4 h-4" />
-                        <span>Загружаем…</span>
+                        <span>{d.loading}</span>
                     </div>
                 )}
                 {hasNextPage ? (
@@ -106,11 +112,11 @@ const DashboardNews = () => {
                         disabled={isFetchingNextPage}
                         className="w-full py-2 px-4 rounded-lg text-sm"
                     >
-                        Загрузить ещё
+                        {d.loadMore}
                     </Button>
                 ) : allNews.length > 0 ? (
                     <p className="text-[var(--accent-gray)] text-center text-xs py-1">
-                        Все записи загружены
+                        {d.allLoaded}
                     </p>
                 ) : null}
             </div>

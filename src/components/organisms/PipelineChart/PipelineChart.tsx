@@ -1,5 +1,7 @@
 'use client'
 import Content from '@/components/atoms/Content'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
 import {
     BarElement,
     CategoryScale,
@@ -39,32 +41,35 @@ const options: ChartOptions<'bar'> = {
 }
 
 const PipelineChart = () => {
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].charts.pipeline
+
     const data = {
         labels: ['Q1', 'Q2', 'Q3', 'Q4'],
         datasets: [
             {
-                label: 'Лиды',
+                label: d.leads,
                 data: [120, 145, 130, 160],
                 backgroundColor: 'rgba(60, 158, 255, 0.75)',
                 borderWidth: 0,
                 borderRadius: 0,
             },
             {
-                label: 'Квалификация',
+                label: d.qualification,
                 data: [80, 95, 88, 110],
                 backgroundColor: 'rgba(52, 211, 153, 0.75)',
                 borderWidth: 0,
                 borderRadius: 0,
             },
             {
-                label: 'Предложение',
+                label: d.proposal,
                 data: [50, 60, 55, 72],
                 backgroundColor: 'rgba(251, 191, 36, 0.75)',
                 borderWidth: 0,
                 borderRadius: 0,
             },
             {
-                label: 'Закрытие',
+                label: d.closing,
                 data: [30, 38, 34, 45],
                 backgroundColor: 'rgba(167, 139, 250, 0.75)',
                 borderWidth: 0,
@@ -76,8 +81,8 @@ const PipelineChart = () => {
     return (
         <Content className='w-full'>
             <div className='mb-4'>
-                <h2 className='text-base font-semibold text-[var(--secondary)]'>Воронка продаж</h2>
-                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>Сделки по стадиям и кварталам</p>
+                <h2 className='text-base font-semibold text-[var(--secondary)]'>{d.title}</h2>
+                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>{d.subtitle}</p>
             </div>
             <div className='w-full h-[200px] sm:h-[220px]'>
                 <Bar data={data} options={options} />

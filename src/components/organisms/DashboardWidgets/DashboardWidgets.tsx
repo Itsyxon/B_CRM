@@ -1,9 +1,11 @@
 'use client'
-import Content from '@/components/atoms/Content';
-import Loader from '@/components/atoms/Loader';
-import { useWidgets } from '@/app/api/widgets/useWidgets';
-import { hidePrice } from '@/lib/utils';
-import { ArrowDown, ArrowUp, DollarSign, Package, TrendingUp } from 'lucide-react';
+import Content from '@/components/atoms/Content'
+import Loader from '@/components/atoms/Loader'
+import { useWidgets } from '@/app/api/widgets/useWidgets'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
+import { hidePrice } from '@/lib/utils'
+import { ArrowDown, ArrowUp, DollarSign, Package, TrendingUp } from 'lucide-react'
 
 const widgetMeta = [
     {
@@ -25,6 +27,8 @@ const widgetMeta = [
 
 const DashboardWidgets = () => {
     const { data: widgetsData, isLoading, isError } = useWidgets()
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].widgets
 
     if (isLoading) {
         return (
@@ -41,7 +45,7 @@ const DashboardWidgets = () => {
     if (isError) {
         return (
             <Content>
-                <p className='text-red-500 text-sm'>Ошибка загрузки данных</p>
+                <p className='text-red-500 text-sm'>{d.error}</p>
             </Content>
         )
     }
@@ -73,7 +77,7 @@ const DashboardWidgets = () => {
                 )
             })}
         </div>
-    );
-};
+    )
+}
 
-export default DashboardWidgets;
+export default DashboardWidgets

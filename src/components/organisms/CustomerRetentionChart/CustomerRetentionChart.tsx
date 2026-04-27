@@ -1,5 +1,7 @@
 'use client'
 import Content from '@/components/atoms/Content'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
 import {
     CategoryScale,
     Chart as ChartJS,
@@ -14,8 +16,6 @@ import {
 import { Line } from 'react-chartjs-2'
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Filler, Tooltip, Legend)
-
-const labels = ['Нед. 1', 'Нед. 2', 'Нед. 3', 'Нед. 4', 'Нед. 5', 'Нед. 6', 'Нед. 7', 'Нед. 8']
 
 const options: ChartOptions<'line'> = {
     responsive: true,
@@ -41,11 +41,15 @@ const options: ChartOptions<'line'> = {
 }
 
 const CustomerRetentionChart = () => {
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].charts.customerRetention
+    const weekLabels = dashboardDictionary[own.language].charts.weeklyRevenue.weekLabels
+
     const chartData = {
-        labels,
+        labels: weekLabels,
         datasets: [
             {
-                label: 'Удержание',
+                label: d.retention,
                 data: [92, 89, 91, 88, 93, 90, 94, 96],
                 borderColor: 'rgba(52, 211, 153, 0.9)',
                 backgroundColor: 'rgba(52, 211, 153, 0.08)',
@@ -57,7 +61,7 @@ const CustomerRetentionChart = () => {
                 borderWidth: 2,
             },
             {
-                label: 'Отрасль',
+                label: d.industry,
                 data: [85, 85, 85, 85, 85, 85, 85, 85],
                 borderColor: 'rgba(251, 113, 133, 0.7)',
                 backgroundColor: 'transparent',
@@ -74,8 +78,8 @@ const CustomerRetentionChart = () => {
         <Content className="w-full">
             <div className="flex items-start justify-between mb-4">
                 <div>
-                    <h2 className="text-base font-semibold text-[var(--secondary)]">Удержание клиентов</h2>
-                    <p className="text-xs text-[var(--accent-gray)] mt-0.5">Retention rate vs отрасль, %</p>
+                    <h2 className="text-base font-semibold text-[var(--secondary)]">{d.title}</h2>
+                    <p className="text-xs text-[var(--accent-gray)] mt-0.5">{d.subtitle}</p>
                 </div>
             </div>
             <div className="w-full h-[200px] sm:h-[220px]">

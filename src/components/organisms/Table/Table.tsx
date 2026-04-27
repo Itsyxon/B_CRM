@@ -4,6 +4,8 @@ import Select from "@/components/atoms/Select"
 import { ColumnDef, ColumnSort, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table"
 import { ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react"
 import { useState } from "react"
+import { useSettings } from "@/context/SettingsContext"
+import { tableDictionary } from "@/lib/dictionaries"
 
 interface TableProps<TData> {
     data: TData[]
@@ -28,6 +30,8 @@ const Table = <TData,>({
     pageSize = 10,
     className = '',
 }: TableProps<TData>) => {
+    const { own } = useSettings()
+    const d = tableDictionary[own.language]
     const [sorting, setSorting] = useState<SortingState>(defaultSorting)
 
     const table = useReactTable({
@@ -93,7 +97,7 @@ const Table = <TData,>({
             {pagination && (
                 <div className="px-5 py-3.5 border-t border-[var(--border)] bg-[var(--navbar)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <p className="text-xs text-[var(--accent-gray)]">
-                        Показано <span className="font-semibold text-[var(--foreground)]">{from}–{to}</span> из <span className="font-semibold text-[var(--foreground)]">{data.length}</span>
+                        {d.showing(from, to, data.length)}
                     </p>
 
                     <div className="flex items-center gap-3">
@@ -103,7 +107,7 @@ const Table = <TData,>({
                             className="text-xs py-1.5 px-2 rounded-lg border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)]"
                         >
                             {[10, 20, 30, 50].map(s => (
-                                <option key={s} value={s}>По {s}</option>
+                                <option key={s} value={s}>{d.per(s)}</option>
                             ))}
                         </Select>
 
@@ -112,7 +116,7 @@ const Table = <TData,>({
                                 onClick={() => table.previousPage()}
                                 disabled={!table.getCanPreviousPage()}
                                 className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--background)] transition-colors cursor-pointer"
-                                aria-label="Назад"
+                                aria-label={d.prev}
                             >
                                 <ChevronLeft size={15} />
                             </button>
@@ -125,7 +129,7 @@ const Table = <TData,>({
                                 onClick={() => table.nextPage()}
                                 disabled={!table.getCanNextPage()}
                                 className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--tertiary)] text-[var(--foreground)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--background)] transition-colors cursor-pointer"
-                                aria-label="Вперёд"
+                                aria-label={d.next}
                             >
                                 <ChevronRight size={15} />
                             </button>

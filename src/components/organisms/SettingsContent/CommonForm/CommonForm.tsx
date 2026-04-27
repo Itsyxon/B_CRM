@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Divider from '@/components/atoms/Divider'
 import Input from '@/components/atoms/Input'
 import { useSettings } from '@/context/SettingsContext'
+import { settingsDictionary } from '@/lib/dictionaries'
 import { CommonSettings } from '@/types/SettingsTypes'
 
 const Checkbox = ({
@@ -59,7 +60,8 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 )
 
 const CommonForm = () => {
-    const { common, updateCommon } = useSettings()
+    const { own, common, updateCommon } = useSettings()
+    const d = settingsDictionary[own.language]
     const [companyName, setCompanyName] = useState(common.companyName)
 
     const set = <K extends keyof CommonSettings>(key: K, value: CommonSettings[K]) => {
@@ -70,54 +72,42 @@ const CommonForm = () => {
         <div className="mt-4 flex flex-col gap-0">
             <Divider />
             <div className="py-3">
-                <SectionTitle>Настройки компании</SectionTitle>
+                <SectionTitle>{d.sections.company}</SectionTitle>
                 <div className="py-2.5">
                     <label className="text-sm font-medium text-[var(--foreground)] block mb-1.5">
-                        Название компании
+                        {d.common.companyNameLabel}
                     </label>
                     <Input
                         type="text"
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
                         onBlur={() => set('companyName', companyName)}
-                        placeholder="Введите название"
+                        placeholder={d.common.companyNamePlaceholder}
                         className="w-full max-w-sm"
                     />
                 </div>
-                <Row
-                    label="Скрывать название компании"
-                    description="Другие пользователи не увидят название"
-                >
+                <Row label={d.common.hideCompanyName} description={d.common.hideCompanyNameDesc}>
                     <Checkbox
                         id="hideCompanyName"
                         checked={common.hideCompanyName}
                         onChange={(v) => set('hideCompanyName', v)}
                     />
                 </Row>
-                <Row
-                    label="Скрывать количество сотрудников"
-                    description="Скрыть число сотрудников в вашем профиле"
-                >
+                <Row label={d.common.hideEmployeeCount} description={d.common.hideEmployeeCountDesc}>
                     <Checkbox
                         id="hideEmployeeCount"
                         checked={common.hideEmployeeCount}
                         onChange={(v) => set('hideEmployeeCount', v)}
                     />
                 </Row>
-                <Row
-                    label="Скрывать количество сделок"
-                    description="Скрыть статистику сделок от других пользователей"
-                >
+                <Row label={d.common.hideDealCount} description={d.common.hideDealCountDesc}>
                     <Checkbox
                         id="hideDealCount"
                         checked={common.hideDealCount}
                         onChange={(v) => set('hideDealCount', v)}
                     />
                 </Row>
-                <Row
-                    label="Закрытый профиль компании"
-                    description="Доступен только участникам вашей компании"
-                >
+                <Row label={d.common.privateProfile} description={d.common.privateProfileDesc}>
                     <Checkbox
                         id="privateProfile"
                         checked={common.privateProfile}
@@ -128,25 +118,22 @@ const CommonForm = () => {
 
             <Divider />
             <div className="py-3">
-                <SectionTitle>Виджеты</SectionTitle>
+                <SectionTitle>{d.sections.widgets}</SectionTitle>
                 <p className="text-sm text-[var(--secondary)] py-1">
                     <Link
                         className="text-[var(--info)] font-semibold underline underline-offset-4"
                         href="/help"
                     >
-                        Свяжитесь
+                        {d.common.widgetContact}
                     </Link>{' '}
-                    с тех. поддержкой, чтобы запросить создание собственного виджета
+                    {d.common.widgetContactText}
                 </p>
             </div>
 
             <Divider />
             <div className="py-3">
-                <SectionTitle>Настройка проектов</SectionTitle>
-                <Row
-                    label="Автоматически скрывать просроченные проекты"
-                    description="Проекты с истекшим сроком убираются из общего списка"
-                >
+                <SectionTitle>{d.sections.projects}</SectionTitle>
+                <Row label={d.common.autoHideExpired} description={d.common.autoHideExpiredDesc}>
                     <Checkbox
                         id="autoHideExpiredProjects"
                         checked={common.autoHideExpiredProjects}

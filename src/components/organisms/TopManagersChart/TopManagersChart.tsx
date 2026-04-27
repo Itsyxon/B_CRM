@@ -1,5 +1,7 @@
 'use client'
 import Content from '@/components/atoms/Content'
+import { useSettings } from '@/context/SettingsContext'
+import { dashboardDictionary } from '@/lib/dictionaries'
 import {
     BarElement,
     CategoryScale,
@@ -43,11 +45,14 @@ const options: ChartOptions<'bar'> = {
 }
 
 const TopManagersChart = () => {
+    const { own } = useSettings()
+    const d = dashboardDictionary[own.language].charts.topManagers
+
     const data = {
         labels: managers,
         datasets: [
             {
-                label: 'Сделок закрыто',
+                label: d.dealsClosed,
                 data: sales,
                 backgroundColor: BG_COLORS,
                 borderColor: 'transparent',
@@ -60,8 +65,8 @@ const TopManagersChart = () => {
     return (
         <Content className='w-full'>
             <div className='mb-4'>
-                <h2 className='text-base font-semibold text-[var(--secondary)]'>Топ менеджеров</h2>
-                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>По числу закрытых сделок</p>
+                <h2 className='text-base font-semibold text-[var(--secondary)]'>{d.title}</h2>
+                <p className='text-xs text-[var(--accent-gray)] mt-0.5'>{d.subtitle}</p>
             </div>
             <div className='w-full h-[200px] sm:h-[220px]'>
                 <Bar data={data} options={options} />
